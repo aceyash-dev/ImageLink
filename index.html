@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageLink®</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Outfit:wght@800&display=swap" rel="stylesheet">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            /* Tar Mode (Dark) */
+            --bg-deep: #0A0A0F;
+            --glow-blurple: rgba(88, 101, 242, 0.45);
+            --accent-purple: rgba(155, 93, 229, 0.35);
+            --high-cyan: rgba(13, 248, 255, 0.25);
+            --panel-bg: rgba(10, 10, 15, 0.55);
+            --card-bg: rgba(0, 0, 0, 0.6);
+            --input-bg: rgba(0, 0, 0, 0.8);
+            
+            --solid-blurple: #5865F2;
+            --solid-cyan: #0DF8FF;
+            --danger: #ff2a5f;
+            --success: #00ff9d;
+            --text-main: #ffffff;
+            --text-muted: #a0aabf;
+        }
+
+        /* Light Mode */
+        body.light-mode {
+            --bg-deep: #F4F7FB;
+            --glow-blurple: rgba(88, 101, 242, 0.15);
+            --accent-purple: rgba(155, 93, 229, 0.1);
+            --high-cyan: rgba(13, 248, 255, 0.2);
+            --panel-bg: rgba(255, 255, 255, 0.7);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --input-bg: rgba(240, 244, 248, 0.9);
+            
+            --solid-blurple: #4752C4;
+            --solid-cyan: #00B4D8;
+            --text-main: #1A1C23;
+            --text-muted: #6B7280;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif; font-weight: 600;
+            background-color: var(--bg-deep); min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding: 2rem 1rem; color: var(--text-main);
+            transition: background-color 0.5s ease, color 0.5s ease;
+            overflow-x: hidden;
+        }
+
+        /* Particles */
+        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; }
+
+        /* Hardware Accelerated Smooth Containers */
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--solid-cyan); border-radius: 24px;
+            padding: 2rem; width: 100%; max-width: 900px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), inset 0 0 20px var(--glow-blurple);
+            display: flex; flex-direction: column; gap: 1.5rem;
+            will-change: transform, box-shadow;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* Smoother bezier */
+        }
+
+        /* Typography */
+        h1, h2, h3 { 
+            font-family: 'Google Sans Flex', 'Google Sans', 'Outfit', sans-serif; 
+            font-weight: 800; letter-spacing: -0.5px; 
+            display: flex; align-items: center; gap: 0.8rem; 
+        }
+
+        h1 {
+            text-align: center; font-size: 2.8rem;
+            color: var(--solid-blurple);
+            text-shadow: 0px 4px 15px var(--glow-blurple);
+            transition: text-shadow 0.3s ease;
+        }
+        h1:hover { text-shadow: 0px 4px 25px var(--solid-blurple); }
+
+        .header-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+
+        /* Smoothed Buttons */
+        .btn {
+            font-family: 'Montserrat', sans-serif; font-weight: 800; text-transform: uppercase;
+            background: linear-gradient(45deg, var(--solid-blurple), #7289DA);
+            color: white; border: none; padding: 0.6rem 1rem; border-radius: 12px;
+            cursor: pointer; font-size: 0.75rem; 
+            display: flex; align-items: center; gap: 0.4rem; justify-content: center;
+            box-shadow: 0 4px 15px var(--glow-blurple);
+            will-change: transform, box-shadow;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy but smooth */
+        }
+        .btn:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 8px 25px var(--solid-blurple); }
+        .btn-outline { background: var(--input-bg); border: 2px solid var(--solid-cyan); color: var(--text-main); box-shadow: none; }
+        .btn-outline:hover { background: var(--solid-cyan); color: #fff; box-shadow: 0 5px 20px var(--high-cyan); }
+        .btn-danger { background: rgba(255, 42, 95, 0.1); color: var(--danger); border: 2px solid var(--danger); box-shadow: none; }
+        .btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 5px 20px rgba(255, 42, 95, 0.4); }
+
+        /* Dropzone */
+        .dropzone {
+            border: 3px dashed var(--solid-cyan); border-radius: 20px; padding: 3rem 1rem; 
+            text-align: center; cursor: pointer; background: var(--glow-blurple);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
+            will-change: transform, border-color;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .dropzone p { font-family: 'Google Sans Flex', 'Outfit', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--text-main); }
+        .dropzone:hover, .dropzone.dragover { transform: scale(1.02); border-style: solid; background: rgba(88, 101, 242, 0.6); }
+
+        .queue-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+
+        /* Queue Card */
+        .queue-item {
+            background: var(--card-bg); border: 1px solid rgba(88, 101, 242, 0.3);
+            border-radius: 16px; padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            animation: popCard 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            will-change: transform; transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .queue-item:hover { transform: translateY(-4px); box-shadow: 0 12px 25px var(--glow-blurple); }
+        @keyframes popCard { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+
+        .item-preview { width: 100%; height: 140px; object-fit: cover; border-radius: 12px; background: #000; border: 2px solid var(--high-cyan); }
+        
+        .item-header { display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Inline Renaming */
+        .name-input {
+            background: transparent; border: 1px dashed transparent; color: var(--solid-cyan);
+            font-size: 0.9rem; font-weight: 800; font-family: 'Montserrat', sans-serif;
+            width: 60%; outline: none; transition: 0.3s; text-overflow: ellipsis; padding: 2px 4px;
+        }
+        .name-input:hover, .name-input:focus { border-color: var(--solid-blurple); background: var(--input-bg); border-radius: 4px; }
+        
+        .progress-track { width: 100%; height: 8px; background: var(--input-bg); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--solid-cyan), var(--solid-blurple)); transition: width 0.3s ease-out; }
+
+        /* Action Bar */
+        .links-container { display: none; flex-direction: column; gap: 0.6rem; }
+        .links-container.active { display: flex; animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn { from{opacity:0; transform: translateY(-5px);} to{opacity:1; transform: translateY(0);} }
+
+        .link-group { display: flex; gap: 0.5rem; }
+        .link-group input {
+            flex: 1; padding: 0.5rem; background: var(--input-bg);
+            border: 1px solid rgba(88, 101, 242, 0.4); border-radius: 8px;
+            color: var(--text-main); font-family: monospace; font-size: 0.75rem; outline: none;
+            transition: border-color 0.3s;
+        }
+        .link-group input:focus { border-color: var(--solid-blurple); }
+        
+        .action-bar { display: flex; gap: 0.4rem; justify-content: space-between; }
+        .action-bar .btn { flex: 1; padding: 0.5rem 0; font-size: 0.7rem; }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { 
+            width: 95%; max-width: 1000px; max-height: 95vh; overflow-y: auto; 
+            display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; 
+            transform: scale(0.95); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: var(--panel-bg); color: var(--text-main);
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-content.small { display: flex; flex-direction: column; max-width: 400px; text-align: center; align-items: center; }
+
+        @media (max-width: 800px) { .modal-content { grid-template-columns: 1fr; } }
+
+        /* Workspace */
+        .editor-workspace { display: flex; flex-direction: column; gap: 1rem; }
+        .canvas-container {
+            width: 100%; height: 400px; background: repeating-conic-gradient(#aaa 0% 25%, #ccc 0% 50%) 50% / 20px 20px;
+            border-radius: 12px; overflow: hidden; position: relative;
+            display: flex; justify-content: center; align-items: center;
+            border: 2px solid var(--solid-blurple); cursor: crosshair;
+        }
+        body:not(.light-mode) .canvas-container { background: repeating-conic-gradient(#222 0% 25%, #111 0% 50%) 50% / 20px 20px; }
+        canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+        #cropBox { position: absolute; border: 2px dashed var(--solid-cyan); background: var(--high-cyan); display: none; pointer-events: none; }
+
+        .editor-sidebar {
+            background: var(--card-bg); padding: 1.5rem; border-radius: 16px;
+            display: flex; flex-direction: column; gap: 1rem; border: 1px solid var(--solid-blurple);
+        }
+        .control-group { display: flex; flex-direction: column; gap: 0.3rem; }
+        .control-row { display: flex; gap: 0.5rem; align-items: center; }
+        .control-group label { font-size: 0.75rem; color: var(--solid-blurple); font-weight: 800; text-transform: uppercase; }
+        .control-group input[type="text"], .control-group input[type="number"], .control-group select {
+            width: 100%; padding: 0.6rem; background: var(--input-bg); font-weight: bold; font-family: 'Montserrat';
+            border: 1px solid rgba(88, 101, 242, 0.4); color: var(--text-main); border-radius: 6px; outline: none; transition: 0.3s;
+        }
+        .control-group input:focus, .control-group select:focus { border-color: var(--solid-blurple); }
+        input[type="range"] { accent-color: var(--solid-blurple); }
+        .checkbox-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; cursor: pointer; color: var(--solid-blurple); font-weight: 800;}
+
+        /* App Footer */
+        .app-footer {
+            margin-top: 3rem; padding: 1.5rem; max-width: 600px;
+            text-align: center; border-radius: 16px; border-width: 1px;
+            display: flex; flex-direction: column; gap: 0.5rem;
+            animation: none; /* Disable float for footer */
+        }
+        .app-footer p { font-family: 'Google Sans Flex', 'Outfit', sans-serif; font-weight: 800; color: var(--solid-blurple); }
+        .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; }
+        .footer-links a:hover { color: var(--solid-cyan); }
+
+        #qrcode { background: white; padding: 1rem; border-radius: 12px; margin-top: 1rem; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--solid-blurple); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+
+    <div class="glass-panel" style="margin-top: 2rem;">
+        <div class="header-controls">
+            <h1>
+                <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" delay="1000" colors="primary:#5865f2,secondary:#0df8ff" style="width:45px;height:45px"></lord-icon>
+                ImageLink®
+            </h1>
+            <div style="display: flex; gap: 0.8rem;">
+                <button class="btn btn-outline" onclick="toggleTheme()" id="themeBtn">
+                    <lord-icon src="https://cdn.lordicon.com/qwwuykwi.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px"></lord-icon>
+                    LIGHT MODE
+                </button>
+                <button class="btn btn-danger" onclick="clearHistory()">
+                    <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="hover" colors="primary:#ffffff,secondary:#ff2a5f" style="width:18px;height:18px"></lord-icon>
+                    CLEAR
+                </button>
+            </div>
+        </div>
+        
+        <div class="dropzone" id="dropzone">
+            <lord-icon src="https://cdn.lordicon.com/vixtkkbk.json" trigger="loop" delay="2000" colors="primary:#5865f2,secondary:#0df8ff" style="width:75px;height:75px"></lord-icon>
+            <p>DRAG & DROP IMAGES</p>
+            <span style="color: var(--text-main); font-size: 0.8rem;">OR CLICK TO BROWSE</span>
+            <input type="file" id="fileInput" accept="image/*" multiple hidden>
+        </div>
+
+        <div class="queue-container" id="queueContainer"></div>
+    </div>
+
+    <footer class="app-footer glass-panel">
+        <p>© Ace Horizon 2026</p>
+        <div class="footer-links">
+            <a href="https://github.com/aceyash-dev" target="_blank">
+                <lord-icon src="https://cdn.lordicon.com/cxugkwnc.json" trigger="hover" colors="primary:#a0aabf" style="width:16px;height:16px; vertical-align: middle;"></lord-icon>
+                GitHub @aceyash-dev
+            </a> 
+            <span style="color: var(--solid-blurple); margin: 0 0.5rem;">|</span> 
+            <a href="https://aceyash.vercel.app" target="_blank">
+                <lord-icon src="https://cdn.lordicon.com/qhgmphtg.json" trigger="hover" colors="primary:#a0aabf" style="width:16px;height:16px; vertical-align: middle;"></lord-icon>
+                aceyash.vercel.app
+            </a>
+        </div>
+    </footer>
+
+    <div class="modal-overlay" id="qrModal" onclick="if(event.target===this) closeQR()">
+        <div class="modal-content small glass-panel">
+            <h3 style="color: var(--solid-blurple);">SCAN QR CODE</h3>
+            <div id="qrcode"></div>
+            <button class="btn" style="margin-top: 1rem; width: 100%;" onclick="closeQR()">CLOSE</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="editorModal">
+        <div class="modal-content glass-panel">
+            <div class="editor-workspace">
+                <h2 style="color: var(--solid-blurple);">
+                    <lord-icon src="https://cdn.lordicon.com/puvaffet.json" trigger="loop" colors="primary:#5865f2,secondary:#0df8ff" style="width:35px;height:35px"></lord-icon> 
+                    EDIT WORKSPACE
+                </h2>
+                <div class="canvas-container" id="canvasContainer">
+                    <canvas id="editCanvas"></canvas>
+                    <div id="cropBox"></div>
+                </div>
+                <div class="control-row">
+                    <button class="btn" id="btnDrawCrop">START CROP</button>
+                    <button class="btn btn-outline" id="btnApplyCrop" style="display:none; border-color: var(--success); color: var(--success);">APPLY CROP</button>
+                </div>
+            </div>
+
+            <div class="editor-sidebar">
+                <h3>DIMENSIONS & TRANSFORM</h3>
+                <label class="checkbox-label"><input type="checkbox" id="lockRatio" checked> Lock Ratio</label>
+                <div class="control-row">
+                    <div class="control-group" style="flex: 1;"><label>Width</label><input type="number" id="editW"></div>
+                    <div class="control-group" style="width: 70px;"><label>Unit</label><select id="unitW"><option value="px">px</option><option value="%">%</option></select></div>
+                </div>
+                <div class="control-row">
+                    <div class="control-group" style="flex: 1;"><label>Height</label><input type="number" id="editH"></div>
+                    <div class="control-group" style="width: 70px;"><label>Unit</label><select id="unitH"><option value="px">px</option><option value="%">%</option></select></div>
+                </div>
+                <div class="control-row">
+                    <div class="control-group" style="flex: 1;"><label>Rotate</label><select id="editRotate"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></div>
+                    <div class="control-group" style="flex: 1;"><label>Flip</label><select id="editFlip"><option value="none">None</option><option value="h">Horizontal</option><option value="v">Vertical</option></select></div>
+                </div>
+
+                <h3>ADJUSTMENTS</h3>
+                <div class="control-group"><label>Zoom (<span id="zoomVal">1x</span>)</label><input type="range" id="editZoom" min="0.1" max="3" step="0.1" value="1"></div>
+                <div class="control-group">
+                    <label>Filter</label>
+                    <select id="editFilter">
+                        <option value="none">None</option><option value="grayscale(100%)">Grayscale</option>
+                        <option value="sepia(100%)">Sepia</option><option value="invert(100%)">Invert</option>
+                        <option value="blur(4px)">Blur</option><option value="brightness(150%)">Brighten</option>
+                    </select>
+                </div>
+                <div style="flex: 1;"></div>
+                <div class="control-group"><label>Format</label><select id="editFormat"><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option></select></div>
+
+                <div class="control-row" style="margin-top: 0.5rem; justify-content: space-between;">
+                    <button class="btn btn-outline" onclick="closeEditor()">CANCEL</button>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-outline" onclick="downloadImage()">⬇️ PC</button>
+                        <button class="btn" onclick="saveEdits()">UPDATE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Init Particles mapped to Blurple
+        function initParticles() {
+            const isLight = document.body.classList.contains('light-mode');
+            particlesJS("particles-js", {
+                particles: {
+                    number: { value: 60, density: { enable: true, value_area: 800 } },
+                    color: { value: isLight ? "#5865F2" : "#0DF8FF" },
+                    shape: { type: "circle" },
+                    opacity: { value: 0.5, random: true },
+                    size: { value: 3, random: true },
+                    line_linked: { enable: true, distance: 150, color: isLight ? "#5865F2" : "#5865F2", opacity: 0.3, width: 1 },
+                    move: { enable: true, speed: 1.5, direction: "none", random: true, out_mode: "out" }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true },
+                    modes: { grab: { distance: 140, line_linked: { opacity: 0.8 } }, push: { particles_nb: 3 } }
+                },
+                retina_detect: true
+            });
+        }
+
+        // Theme Toggle
+        let isLightMode = localStorage.getItem('imagelink_theme') === 'light';
+        const tBtn = document.getElementById('themeBtn');
+        if(isLightMode) { 
+            document.body.classList.add('light-mode'); 
+            tBtn.innerHTML = '<lord-icon src="https://cdn.lordicon.com/qwwuykwi.json" trigger="hover" colors="primary:#1A1C23" style="width:18px;height:18px"></lord-icon>TAR MODE'; 
+        }
+        
+        window.toggleTheme = () => {
+            document.body.classList.toggle('light-mode');
+            isLightMode = document.body.classList.contains('light-mode');
+            localStorage.setItem('imagelink_theme', isLightMode ? 'light' : 'dark');
+            const color = isLightMode ? '#1A1C23' : '#ffffff';
+            tBtn.innerHTML = `<lord-icon src="https://cdn.lordicon.com/qwwuykwi.json" trigger="hover" colors="primary:${color}" style="width:18px;height:18px"></lord-icon> ${isLightMode ? 'TAR MODE' : 'LIGHT MODE'}`;
+            initParticles();
+        };
+
+        // DOM Elements
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const queueContainer = document.getElementById('queueContainer');
+        const editorModal = document.getElementById('editorModal');
+        const canvas = document.getElementById('editCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const cropBox = document.getElementById('cropBox');
+
+        // Cloudinary Engine
+        const CLOUD_NAME = 'dvzzebkww';
+        const UPLOAD_PRESET = 'linkshare_unsigned';
+
+        let currentEditingItem = null;
+        let originalImage = new Image();
+        let currentImage = new Image(); 
+        let uploadHistory = JSON.parse(localStorage.getItem('imagelink_history_v8')) || [];
+        
+        let isDrawingCrop = false, cropModeActive = false;
+        let cropStart = {x: 0, y: 0}, cropRect = {x: 0, y: 0, w: 0, h: 0};
+
+        window.onload = () => { initParticles(); renderHistory(); };
+
+        // --- Drag & Drop ---
+        dropzone.addEventListener('click', () => fileInput.click());
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, prev, false));
+        function prev(e) { e.preventDefault(); e.stopPropagation(); }
+        ['dragenter', 'dragover'].forEach(e => dropzone.addEventListener(e, () => dropzone.classList.add('dragover'), false));
+        ['dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, () => dropzone.classList.remove('dragover'), false));
+        dropzone.addEventListener('drop', e => processFiles(e.dataTransfer.files), false);
+        fileInput.addEventListener('change', e => processFiles(e.target.files), false);
+
+        function processFiles(files) {
+            [...files].forEach(file => {
+                if(!file.type.startsWith('image/')) return alert('Images only.');
+                const reader = new FileReader();
+                reader.onload = (e) => createQueueItem(file.name, e.target.result, true);
+                reader.readAsDataURL(file);
+            });
+            fileInput.value = '';
+        }
+
+        // --- Queue & Links ---
+        async function createQueueItem(name, b64Data, isNew = false, cloudUrl = null) {
+            const itemId = 'item-' + Math.random().toString(36).substr(2, 9);
+            const viewUrl = cloudUrl || b64Data;
+            const safeName = name.replace(/"/g, '&quot;');
+
+            const itemHTML = `
+                <div class="queue-item" id="${itemId}">
+                    <img src="${b64Data}" class="item-preview" id="thumb-${itemId}">
+                    <div class="item-header">
+                        <input type="text" class="name-input" id="name-${itemId}" value="${safeName}" title="Click to rename" onchange="renameFile('${itemId}')">
+                        <span class="item-status" style="color: ${isNew ? 'var(--solid-cyan)' : 'var(--success)'}; font-size: 0.75rem;">${isNew ? 'BEAMING...' : 'ONLINE'}</span>
+                    </div>
+                    ${isNew ? `<div class="progress-track" id="track-${itemId}"><div class="progress-fill" id="fill-${itemId}"></div></div>` : ''}
+                    
+                    <div class="links-container ${isNew ? '' : 'active'}" id="links-${itemId}">
+                        <div class="link-group">
+                            <input type="text" id="direct-${itemId}" value="${viewUrl}" readonly>
+                            <button class="btn" onclick="copyToClipboard('direct-${itemId}')">COPY</button>
+                        </div>
+                        <input type="hidden" id="md-${itemId}" value="![${safeName}](${viewUrl})">
+                        
+                        <div class="action-bar">
+                            <button class="btn btn-outline" onclick="copyToClipboard('md-${itemId}')" title="Copy Markdown">📝 MD</button>
+                            <button class="btn btn-outline" onclick="openEditor('${itemId}')" title="Edit Image">🎨 EDIT</button>
+                            <button class="btn btn-outline" onclick="showQR('${itemId}')" title="Scan QR Code">📱 QR</button>
+                            <button class="btn btn-outline" onclick="shareLink('${itemId}')" title="Share via Device">📤 SHARE</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            isNew ? queueContainer.insertAdjacentHTML('afterbegin', itemHTML) : queueContainer.insertAdjacentHTML('beforeend', itemHTML);
+            document.getElementById(itemId).dataset.filename = name;
+            document.getElementById(itemId).dataset.b64 = b64Data;
+            if(cloudUrl) document.getElementById(itemId).dataset.cloud = cloudUrl;
+
+            if(isNew) handleUpload(itemId, name, b64Data);
+        }
+
+        window.renameFile = (itemId) => {
+            const newName = document.getElementById(`name-${itemId}`).value;
+            const item = document.getElementById(itemId);
+            item.dataset.filename = newName;
+            
+            const url = document.getElementById(`direct-${itemId}`).value;
+            document.getElementById(`md-${itemId}`).value = `![${newName}](${url})`;
+            
+            const histIndex = uploadHistory.findIndex(h => h.cloudUrl === item.dataset.cloud || h.b64Data === item.dataset.b64);
+            if(histIndex > -1) {
+                uploadHistory[histIndex].name = newName;
+                localStorage.setItem('imagelink_history_v8', JSON.stringify(uploadHistory));
+            }
+        };
+
+        async function handleUpload(itemId, name, b64Data) {
+            const track = document.getElementById(`track-${itemId}`);
+            const fill = document.getElementById(`fill-${itemId}`);
+            const status = document.querySelector(`#${itemId} .item-status`);
+            
+            fill.style.width = '60%';
+            let finalUrl = null;
+
+            try {
+                const blob = await (await fetch(b64Data)).blob();
+                const formData = new FormData();
+                formData.append('file', blob);
+                formData.append('upload_preset', UPLOAD_PRESET);
+                
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!res.ok || !data.secure_url) throw new Error(data.error?.message || 'Upload failed');
+                
+                finalUrl = data.secure_url;
+                status.textContent = 'ONLINE'; status.style.color = 'var(--success)';
+                
+                document.getElementById(`direct-${itemId}`).value = finalUrl;
+                document.getElementById(`md-${itemId}`).value = `![${name}](${finalUrl})`;
+                document.getElementById(itemId).dataset.cloud = finalUrl;
+                
+            } catch(err) {
+                console.error(err);
+                status.textContent = 'LOCAL ONLY'; status.style.color = 'var(--danger)';
+            }
+
+            fill.style.width = '100%';
+            setTimeout(() => {
+                track.style.display = 'none';
+                document.getElementById(`links-${itemId}`).classList.add('active');
+                if(finalUrl) saveToHistory(name, b64Data, finalUrl);
+            }, 400);
+        }
+
+        // --- Share & QR ---
+        window.shareLink = (itemId) => {
+            const url = document.getElementById(`direct-${itemId}`).value;
+            const name = document.getElementById(itemId).dataset.filename;
+            if (navigator.share) {
+                navigator.share({ title: name, text: 'Check out this image via ImageLink®', url: url }).catch(console.error);
+            } else {
+                copyToClipboard(`direct-${itemId}`);
+                alert('Link copied! Web Share API not supported on this device.');
+            }
+        };
+
+        let qrObj = null;
+        window.showQR = (itemId) => {
+            const url = document.getElementById(`direct-${itemId}`).value;
+            document.getElementById('qrcode').innerHTML = ''; 
+            qrObj = new QRCode(document.getElementById("qrcode"), { text: url, width: 200, height: 200, colorDark : "#5865F2", colorLight : "#ffffff" });
+            document.getElementById('qrModal').classList.add('active');
+        };
+        window.closeQR = () => document.getElementById('qrModal').classList.remove('active');
+
+        // --- History ---
+        function saveToHistory(name, b64Data, cloudUrl = null) {
+            uploadHistory.unshift({ name, b64Data, cloudUrl, date: new Date().toISOString() });
+            if(uploadHistory.length > 8) uploadHistory.pop();
+            localStorage.setItem('imagelink_history_v8', JSON.stringify(uploadHistory));
+        }
+        function renderHistory() { queueContainer.innerHTML = ''; uploadHistory.forEach(i => createQueueItem(i.name, i.b64Data, false, i.cloudUrl)); }
+        window.clearHistory = () => { if(confirm('Nuke all history?')) { localStorage.removeItem('imagelink_history_v8'); uploadHistory = []; queueContainer.innerHTML = ''; } }
+
+        // --- Advanced Editor ---
+        const inW = document.getElementById('editW'); const inH = document.getElementById('editH');
+        const unW = document.getElementById('unitW'); const unH = document.getElementById('unitH');
+        const lockRatio = document.getElementById('lockRatio');
+        let originalRatio = 1;
+
+        window.openEditor = (itemId) => {
+            const item = document.getElementById(itemId);
+            currentEditingItem = itemId;
+            document.getElementById('editZoom').value = 1; document.getElementById('zoomVal').innerText = '1x';
+            document.getElementById('editFilter').value = 'none';
+            document.getElementById('editRotate').value = '0';
+            document.getElementById('editFlip').value = 'none';
+            resetCrop();
+
+            originalImage.onload = () => {
+                currentImage.src = originalImage.src;
+                originalRatio = originalImage.width / originalImage.height;
+                inW.value = originalImage.width; unW.value = 'px';
+                inH.value = originalImage.height; unH.value = 'px';
+                drawCanvas();
+                editorModal.classList.add('active');
+            };
+            originalImage.src = item.dataset.b64;
+        }
+        window.closeEditor = () => { editorModal.classList.remove('active'); currentEditingItem = null; }
+
+        function calculateDim(val, unit, isWidth) {
+            if(unit === 'px') return parseFloat(val);
+            const base = isWidth ? originalImage.width : originalImage.height;
+            return base * (parseFloat(val) / 100);
+        }
+
+        function syncDimensions(source) {
+            const wVal = parseFloat(inW.value) || 0; const hVal = parseFloat(inH.value) || 0;
+            if(lockRatio.checked) {
+                if(source === 'w') {
+                    const actualW = calculateDim(wVal, unW.value, true);
+                    const newH = actualW / originalRatio;
+                    inH.value = unH.value === 'px' ? Math.round(newH) : Math.round((newH / originalImage.height) * 100);
+                } else {
+                    const actualH = calculateDim(hVal, unH.value, false);
+                    const newW = actualH * originalRatio;
+                    inW.value = unW.value === 'px' ? Math.round(newW) : Math.round((newW / originalImage.width) * 100);
+                }
+            }
+            drawCanvas();
+        }
+
+        inW.addEventListener('input', () => syncDimensions('w')); inH.addEventListener('input', () => syncDimensions('h'));
+        unW.addEventListener('change', () => syncDimensions('w')); unH.addEventListener('change', () => syncDimensions('h'));
+        document.getElementById('editZoom').addEventListener('input', (e) => { document.getElementById('zoomVal').innerText = e.target.value + 'x'; drawCanvas(); });
+        document.getElementById('editFilter').addEventListener('change', drawCanvas);
+        document.getElementById('editRotate').addEventListener('change', drawCanvas);
+        document.getElementById('editFlip').addEventListener('change', drawCanvas);
+
+        function drawCanvas() {
+            let w = calculateDim(inW.value, unW.value, true);
+            let h = calculateDim(inH.value, unH.value, false);
+            const zoom = parseFloat(document.getElementById('editZoom').value);
+            const rot = parseInt(document.getElementById('editRotate').value);
+            const flip = document.getElementById('editFlip').value;
+            
+            if (rot === 90 || rot === 270) { canvas.width = h * zoom; canvas.height = w * zoom; } 
+            else { canvas.width = w * zoom; canvas.height = h * zoom; }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(rot * Math.PI / 180);
+            
+            let scaleX = 1, scaleY = 1;
+            if(flip === 'h') scaleX = -1;
+            if(flip === 'v') scaleY = -1;
+            ctx.scale(scaleX, scaleY);
+            
+            ctx.filter = document.getElementById('editFilter').value;
+            ctx.drawImage(currentImage, -(w * zoom)/2, -(h * zoom)/2, w * zoom, h * zoom);
+            ctx.restore();
+        }
+
+        // --- Cropping ---
+        const btnDrawCrop = document.getElementById('btnDrawCrop');
+        const btnApplyCrop = document.getElementById('btnApplyCrop');
+
+        btnDrawCrop.addEventListener('click', () => {
+            cropModeActive = !cropModeActive;
+            if(cropModeActive) {
+                btnDrawCrop.textContent = "CANCEL CROP"; btnDrawCrop.classList.add('btn-danger');
+                btnApplyCrop.style.display = 'block'; canvasContainer.style.cursor = 'crosshair';
+            } else { resetCrop(); }
+        });
+
+        canvasContainer.addEventListener('mousedown', (e) => {
+            if(!cropModeActive) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            cropStart.x = (e.clientX - rect.left) * scaleX; 
+            cropStart.y = (e.clientY - rect.top) * scaleY;
+            isDrawingCrop = true; cropBox.style.display = 'block';
+            
+            cropBox.style.left = (e.clientX - rect.left) + 'px'; 
+            cropBox.style.top = (e.clientY - rect.top) + 'px';
+            cropBox.style.width = '0px'; cropBox.style.height = '0px';
+        });
+
+        canvasContainer.addEventListener('mousemove', (e) => {
+            if(!isDrawingCrop || !cropModeActive) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const currentX = (e.clientX - rect.left) * scaleX; 
+            const currentY = (e.clientY - rect.top) * scaleY;
+            
+            cropRect.x = Math.min(cropStart.x, currentX); 
+            cropRect.y = Math.min(cropStart.y, currentY);
+            cropRect.w = Math.abs(currentX - cropStart.x); 
+            cropRect.h = Math.abs(currentY - cropStart.y);
+            
+            const boxX = Math.min((e.clientX - rect.left), cropStart.x / scaleX);
+            const boxY = Math.min((e.clientY - rect.top), cropStart.y / scaleY);
+            cropBox.style.left = boxX + 'px'; 
+            cropBox.style.top = boxY + 'px';
+            cropBox.style.width = (cropRect.w / scaleX) + 'px'; 
+            cropBox.style.height = (cropRect.h / scaleY) + 'px';
+        });
+
+        window.addEventListener('mouseup', () => { isDrawingCrop = false; });
+
+        btnApplyCrop.addEventListener('click', () => {
+            if(cropRect.w === 0 || cropRect.h === 0) return alert('Select an area.');
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = cropRect.w; tempCanvas.height = cropRect.h;
+            tempCanvas.getContext('2d').drawImage(canvas, cropRect.x, cropRect.y, cropRect.w, cropRect.h, 0, 0, cropRect.w, cropRect.h);
+            
+            currentImage.onload = () => {
+                originalRatio = currentImage.width / currentImage.height;
+                inW.value = currentImage.width; unW.value = 'px';
+                inH.value = currentImage.height; unH.value = 'px';
+                document.getElementById('editZoom').value = 1; document.getElementById('zoomVal').innerText = '1x';
+                document.getElementById('editRotate').value = '0'; document.getElementById('editFlip').value = 'none';
+                resetCrop(); drawCanvas();
+            };
+            currentImage.src = tempCanvas.toDataURL();
+        });
+
+        function resetCrop() {
+            cropModeActive = false; isDrawingCrop = false;
+            cropBox.style.display = 'none'; cropRect = {x:0,y:0,w:0,h:0};
+            btnDrawCrop.textContent = "START CROP"; btnDrawCrop.classList.remove('btn-danger');
+            btnApplyCrop.style.display = 'none'; canvasContainer.style.cursor = 'default';
+        }
+
+        // --- Save & Download ---
+        window.downloadImage = () => {
+            const format = document.getElementById('editFormat').value;
+            const a = document.createElement('a'); a.href = canvas.toDataURL(format);
+            a.download = `ImageLink_Edited_${document.getElementById(currentEditingItem).dataset.filename.split('.')[0]}.${format.split('/')[1]}`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+
+        window.saveEdits = async () => {
+            const b64Data = canvas.toDataURL(document.getElementById('editFormat').value);
+            const item = document.getElementById(currentEditingItem);
+            const name = item.dataset.filename;
+            
+            let finalUrl = b64Data;
+            const statusNode = document.querySelector(`#${currentEditingItem} .item-status`);
+            statusNode.textContent = 'RE-BEAMING...'; statusNode.style.color = 'var(--solid-cyan)';
+
+            try {
+                const blob = await (await fetch(b64Data)).blob();
+                const formData = new FormData(); formData.append('file', blob); formData.append('upload_preset', UPLOAD_PRESET);
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if(data.secure_url) {
+                    finalUrl = data.secure_url;
+                    item.dataset.cloud = finalUrl;
+                    statusNode.textContent = 'UPDATED'; statusNode.style.color = 'var(--success)';
+                } else throw new Error();
+            } catch(e) { console.error(e); statusNode.textContent = 'LOCAL ONLY'; statusNode.style.color = 'var(--danger)'; }
+
+            item.dataset.b64 = b64Data;
+            document.getElementById(`direct-${currentEditingItem}`).value = finalUrl;
+            document.getElementById(`md-${currentEditingItem}`).value = `![${name}](${finalUrl})`;
+            document.getElementById(`thumb-${currentEditingItem}`).src = b64Data;
+
+            const histIndex = uploadHistory.findIndex(h => h.name === name);
+            if(histIndex > -1) {
+                uploadHistory[histIndex].b64Data = b64Data;
+                uploadHistory[histIndex].cloudUrl = item.dataset.cloud || null;
+                localStorage.setItem('imagelink_history_v8', JSON.stringify(uploadHistory));
+            }
+            closeEditor();
+        }
+
+        // --- Utils ---
+        window.copyToClipboard = (id) => {
+            const el = document.getElementById(id);
+            el.type = 'text';
+            el.select(); el.setSelectionRange(0, 999999);
+            navigator.clipboard.writeText(el.value).then(() => {
+                if(id.startsWith('md-')) el.type = 'hidden';
+                const btn = el.nextElementSibling || document.querySelector(`button[onclick="copyToClipboard('${id}')"]`);
+                if(btn) {
+                    const txt = btn.innerHTML; btn.innerHTML = 'COPIED!'; 
+                    btn.style.background = 'var(--success)'; btn.style.color = '#000';
+                    setTimeout(() => { btn.innerHTML = txt; btn.style.background = ''; btn.style.color = ''; }, 1500);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
