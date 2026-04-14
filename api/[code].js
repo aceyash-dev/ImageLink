@@ -22,6 +22,8 @@ export default async function handler(req, res) {
       return res.status(404).send("Link not found");
     }
 
+    // 3. Edge Caching to reduce GitHub API calls
+    res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate");
     return res.redirect(302, links[code].url);
   } catch (error) {
     return res.status(500).send("Server error");
