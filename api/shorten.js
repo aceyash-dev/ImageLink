@@ -5,12 +5,17 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: "Method Not Allowed" });
   }
 
-  const { url, note } = req.body;
+  const { url, note, alias } = req.body;
   if (!url) {
     return res.status(400).json({ message: "URL is required" });
   }
 
-  const code = Math.random().toString(36).substring(2, 7);
+  // 1. Strict URL Validation
+  try {
+    new URL(url);
+  } catch {
+    return res.status(400).json({ message: "Invalid URL provided." });
+  }
 
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
@@ -31,6 +36,19 @@ export default async function handler(req, res) {
     // File may not exist yet
   }
 
+  // 2. Custom Alias & Collision Handling
+  let code;
+  if (alias) {
+    // Sanitize alias: allow only alphanumeric characters, dashes, and underscores
+    code = alias.replace(/[^a-zA-Z0-9-_]/g, '');
+    if (!code) return res.status(400).json({ message: "Invalid alias format." });
+    if (links[code]) return res.status(409).json({ message: "Alias is already in use. Please choose another." });
+  } else {
+    do {
+      code = Math.random().toString(36).substring(2, 7);
+    } while (links[code]);
+  }
+
   links[code] = {
     url,
     note,
@@ -47,7 +65,7 @@ export default async function handler(req, res) {
     sha,
   });
 
-  // Dynamically determine the correct base URL
+  // Construct correct base URL
   const baseUrl =
     process.env.BASE_URL ||
     `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
