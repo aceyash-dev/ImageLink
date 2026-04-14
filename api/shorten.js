@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     sha,
   });
 
-  // Construct correct base URL
+  // Dynamically determine the correct base URL
   const baseUrl =
     process.env.BASE_URL ||
     `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
