@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/([a-zA-Z0-9-]+)",
+      "destination": "/api/[code]?code=$1"
+    }
+  ]
+}
