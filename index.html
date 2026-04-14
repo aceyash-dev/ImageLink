@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AceLink - Smart URL Shortener</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
@@ -12,595 +16,660 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
     <style>
-        /* Typography */
-        @font-face {
-            font-family: 'Google Sans Code';
-            src: local('Google Sans Code Bold'), local('GoogleSansCode-Bold');
-            font-weight: 700;
-        }
-        @font-face {
-            font-family: 'Google Sans Code';
-            src: local('Google Sans Code Regular'), local('GoogleSansCode-Regular');
-            font-weight: 400;
-        }
-
         :root {
+            /* Core Colors */
             --blurple: #5539CC;
             --blurple-light: #7A5FFF;
-            --bg-dark: #121212;
+            
+            /* Dark Theme Variables */
+            --bg-base: #0a0a0c;
             --text-main: #ffffff;
-            --text-muted: #b3b3b3;
-            --font-code: 'Google Sans Code', 'Consolas', 'Courier New', monospace;
-            --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --text-muted: #a1a1aa;
+            --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-light: rgba(255, 255, 255, 0.15);
+            --glass-shadow: rgba(0, 0, 0, 0.6);
+            --input-bg: rgba(0, 0, 0, 0.4);
+            --md-bg: rgba(0, 0, 0, 0.25);
+            --btn-action-bg: rgba(255, 255, 255, 0.04);
+            --btn-action-hover: rgba(255, 255, 255, 0.12);
+            
+            /* Typography */
+            --font-code: 'Space Grotesk', monospace;
+            --font-ui: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Light Theme Override Variables */
+        body.light-mode {
+            --bg-base: #f4f4f8;
+            --text-main: #121212;
+            --text-muted: #52525b;
+            --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%);
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --glass-border-light: rgba(255, 255, 255, 0.8);
+            --glass-shadow: rgba(0, 0, 0, 0.08);
+            --input-bg: rgba(255, 255, 255, 0.7);
+            --md-bg: rgba(255, 255, 255, 0.6);
+            --btn-action-bg: rgba(0, 0, 0, 0.03);
+            --btn-action-hover: rgba(0, 0, 0, 0.08);
         }
 
         body, html {
             margin: 0;
             padding: 0;
             font-family: var(--font-ui);
-            background-color: var(--bg-dark);
+            background-color: var(--bg-base);
             color: var(--text-main);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* Mesh Gradient Background */
+        /* Animated Mesh Gradient Background (Blurple, Violet, Red) */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             background:
                 radial-gradient(circle at 15% 50%, rgba(85, 57, 204, 0.25), transparent 50%),
-                radial-gradient(circle at 85% 30%, rgba(122, 95, 255, 0.25), transparent 50%),
-                radial-gradient(circle at 50% 80%, rgba(85, 57, 204, 0.15), transparent 50%);
+                radial-gradient(circle at 85% 30%, rgba(138, 43, 226, 0.25), transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(255, 50, 50, 0.15), transparent 60%);
+            background-size: 200% 200%;
             z-index: -1;
+            filter: blur(50px);
+            animation: meshFlow 15s ease-in-out infinite alternate;
+            transition: opacity 0.4s ease;
         }
 
+        body.light-mode::before {
+            background:
+                radial-gradient(circle at 15% 50%, rgba(85, 57, 204, 0.15), transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(138, 43, 226, 0.15), transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(255, 50, 50, 0.1), transparent 60%);
+            background-size: 200% 200%;
+        }
+
+        @keyframes meshFlow {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 100%; }
+        }
+
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; }
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            position: relative;
+            max-width: 800px; margin: 0 auto; padding: 3rem 2rem 5rem 2rem; width: 100%; box-sizing: border-box;
         }
 
-        /* Apple Liquid Glass Utility */
+        /* Liquid Glass UI */
         .liquid-glass {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-top: 1px solid rgba(255, 255, 255, 0.25);
-            border-left: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            background: var(--glass-bg);
+            backdrop-filter: blur(35px) saturate(160%);
+            -webkit-backdrop-filter: blur(35px) saturate(160%);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-border-light);
+            border-left: 1px solid var(--glass-border-light);
+            box-shadow: 0 16px 40px -10px var(--glass-shadow);
             border-radius: 24px;
+            transition: all 0.4s ease;
         }
 
+        /* Fixed Header Layout via CSS Grid */
         header {
+            display: grid; 
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center; 
+            margin-bottom: 3rem; 
+            width: 100%;
+        }
+
+        .header-spacer {
+            /* Empty div to balance grid */
+        }
+
+        .branding {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 3rem;
+            gap: 16px;
         }
 
+        .header-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .theme-toggle {
+            background: none; border: none; cursor: pointer; padding: 10px; border-radius: 50%;
+            transition: background 0.3s; display: flex; align-items: center; justify-content: center;
+        }
+        .theme-toggle:hover { background: var(--btn-action-hover); }
+
+        /* Animated Solid Header Text */
         h1 {
-            font-family: var(--font-code);
-            font-size: 2.8rem;
-            margin: 0;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            background: linear-gradient(to right, #fff, var(--blurple-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .input-section {
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-
-        .icon-wrapper {
-            position: absolute;
-            top: 14px;
-            left: 14px;
-            pointer-events: none;
-        }
-
-        input[type="url"], input[type="number"], input[type="color"], textarea {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.2rem 1.2rem 1.2rem 3.5rem;
+            font-family: var(--font-ui); font-size: 3rem; margin: 0; font-weight: 800; letter-spacing: -1px;
             color: var(--text-main);
-            font-family: var(--font-code);
-            font-size: 1rem;
-            box-sizing: border-box;
+            animation: headerGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes headerGlow {
+            0% { text-shadow: 0 0 10px rgba(122, 95, 255, 0.1); transform: translateY(0); }
+            100% { text-shadow: 0 0 25px rgba(122, 95, 255, 0.6), 0 0 50px rgba(85, 57, 204, 0.3); transform: translateY(-2px); }
+        }
+
+        body.light-mode h1 {
+            animation: headerGlowLight 3s ease-in-out infinite alternate;
+        }
+        @keyframes headerGlowLight {
+            0% { text-shadow: 0 0 10px rgba(122, 95, 255, 0.1); transform: translateY(0); }
+            100% { text-shadow: 0 0 20px rgba(122, 95, 255, 0.4); transform: translateY(-2px); }
+        }
+
+        .input-section { padding: 2.5rem; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.5rem; position: relative; }
+        .form-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+        .form-row > div { flex: 1; position: relative; }
+
+        .icon-wrapper { position: absolute; top: 14px; left: 16px; pointer-events: none; display: flex; align-items: center;}
+
+        input[type="url"], input[type="text"], input[type="number"], input[type="color"], textarea, select {
+            width: 100%; background: var(--input-bg); border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 1.2rem 1.2rem 1.2rem 3.5rem; color: var(--text-main);
+            font-family: var(--font-code); font-size: 1rem; box-sizing: border-box; transition: all 0.3s;
+            appearance: none;
+        }
+        
+        select { padding-left: 3.5rem; cursor: pointer; font-family: var(--font-ui); font-weight: 600;}
+        select option { background: var(--bg-base); color: var(--text-main); }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none; border-color: var(--blurple-light); background: var(--input-bg);
+            box-shadow: 0 0 0 4px rgba(122, 95, 255, 0.15);
+        }
+
+        textarea { resize: vertical; min-height: 120px; font-family: var(--font-ui);}
+
+        .btn-primary {
+            display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;
+            background: linear-gradient(135deg, var(--blurple-light), var(--blurple)); color: white;
+            border: none; padding: 1.2rem; font-family: var(--font-ui); font-size: 1.1rem; font-weight: 800;
+            border-radius: 16px; cursor: pointer; box-shadow: 0 8px 25px -5px rgba(85, 57, 204, 0.5);
             transition: all 0.3s ease;
         }
 
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--blurple-light);
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 0 3px rgba(85, 57, 204, 0.3);
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -5px rgba(85, 57, 204, 0.7); }
+
+        .search-bar { margin-bottom: 2rem; position: relative; }
+        .search-bar input { padding-left: 3.5rem; font-family: var(--font-ui); font-weight: 600; }
+
+        .history-section h2 {
+            font-family: var(--font-ui); font-size: 1.6rem; font-weight: 800;
+            border-bottom: 1px solid var(--glass-border); padding-bottom: 1.2rem; margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: 12px;
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 100px;
+        .history-list { display: flex; flex-direction: column; gap: 2rem; }
+        
+        .history-card { 
+            padding: 2rem; 
+            transition: transform 0.3s ease; 
+            position: relative; 
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
+        .history-card:hover { transform: translateY(-4px); }
 
-        .btn-primary {
+        .link-thumbnail {
+            width: 100%;
+            height: 200px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            background: rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+        }
+
+        .link-thumbnail img {
             width: 100%;
-            background: linear-gradient(135deg, var(--blurple-light), var(--blurple));
-            color: white;
-            border: none;
-            padding: 1.2rem;
-            font-family: var(--font-code);
-            font-size: 1.1rem;
-            font-weight: 700;
-            border-radius: 16px;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(85, 57, 204, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+            color: transparent; /* hides alt text if loading */
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(85, 57, 204, 0.6);
+        .history-card:hover .link-thumbnail img {
+            transform: scale(1.05);
         }
 
-        .history-section h2 {
-            font-family: var(--font-code);
-            font-size: 1.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .badge {
+            position: absolute; top: 15px; right: 15px; padding: 6px 12px; border-radius: 10px;
+            font-size: 0.8rem; font-weight: 800; font-family: var(--font-ui); text-transform: uppercase;
+            backdrop-filter: blur(10px); z-index: 2;
         }
+        .badge.active { background: rgba(34, 197, 94, 0.8); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .badge.expired { background: rgba(239, 68, 68, 0.8); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }
 
-        .history-list {
+        .history-content {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .history-card {
-            padding: 1.5rem;
-            transition: transform 0.3s ease;
-        }
-
-        .history-card:hover {
-            transform: translateY(-4px);
-        }
-
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
+            width: 100%;
+            min-width: 0;
         }
 
         .short-url {
-            font-family: var(--font-code);
-            color: var(--blurple-light);
-            font-size: 1.3rem;
-            font-weight: 700;
-            text-decoration: none;
-            text-shadow: 0 2px 10px rgba(122, 95, 255, 0.4);
-            transition: text-shadow 0.2s ease;
+            font-family: var(--font-code); color: var(--blurple-light); font-size: 1.5rem; font-weight: 700;
+            text-decoration: none; transition: all 0.2s;
+            word-wrap: break-word; overflow-wrap: break-word; word-break: break-all;
+        }
+        .short-url:hover { text-decoration: underline; color: var(--blurple); }
+
+        .original-url { 
+            color: var(--text-muted); font-size: 0.95rem; margin: 0.5rem 0 1rem 0; font-family: var(--font-code); 
+            word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; opacity: 0.8;
         }
 
-        .short-url:hover {
-            text-decoration: underline;
-            text-shadow: 0 2px 15px rgba(122, 95, 255, 0.8);
-        }
-
-        .original-url {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            word-break: break-all;
-            margin-top: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
+        .card-actions { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn-action {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 8px 14px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-family: var(--font-code);
-            font-weight: 700;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: background 0.2s;
+            background: var(--btn-action-bg); border: 1px solid var(--glass-border); color: var(--text-main);
+            padding: 8px 16px; border-radius: 12px; cursor: pointer; font-family: var(--font-ui);
+            font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
         }
-
-        .btn-action:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-delete:hover {
-            background: rgba(255, 70, 70, 0.3);
-            border-color: rgba(255, 70, 70, 0.5);
-        }
+        .btn-action:hover { background: var(--btn-action-hover); border-color: var(--glass-border-light); }
+        .btn-delete:hover { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #ff8a8a; }
 
         .markdown-content {
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 4px solid var(--blurple);
-            padding: 1.2rem;
-            border-radius: 12px;
-            margin-top: 1.2rem;
-            font-size: 0.95rem;
-            line-height: 1.6;
+            background: var(--md-bg); border-left: 4px solid var(--blurple); padding: 1.5rem;
+            border-radius: 0 16px 16px 0; font-size: 0.95rem; line-height: 1.7; color: var(--text-main);
+            word-wrap: break-word; overflow-wrap: break-word; overflow: hidden; font-family: var(--font-ui);
         }
-
         .markdown-content p { margin-top: 0; }
         .markdown-content p:last-child { margin-bottom: 0; }
-        .markdown-content a { color: var(--blurple-light); font-weight: bold; }
-        .markdown-content code { 
-            font-family: var(--font-code);
-            background: rgba(255,255,255,0.1); 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-        }
+        .markdown-content a { color: var(--blurple-light); font-weight: 800; text-decoration: none; }
+        .markdown-content a:hover { text-decoration: underline; }
+        .markdown-content code { background: var(--glass-border); padding: 3px 8px; border-radius: 6px; font-size: 0.85em; font-family: var(--font-code); word-wrap: break-word; }
 
-        .empty-state {
-            text-align: center;
-            font-family: var(--font-code);
-            color: var(--text-muted);
-            padding: 3rem;
-            font-style: italic;
-        }
+        .empty-state { text-align: center; color: var(--text-muted); padding: 4rem 2rem; font-weight: 600; }
 
-        /* Toast Notification */
-        #toast {
-            visibility: hidden;
-            min-width: 250px;
-            margin-left: -125px;
-            color: #fff;
-            text-align: center;
-            border-radius: 12px;
-            padding: 16px;
-            position: fixed;
-            z-index: 1000;
-            left: 50%;
-            bottom: 30px;
-            font-family: var(--font-code);
-            font-weight: 700;
-            opacity: 0;
-            transition: opacity 0.3s, visibility 0.3s, bottom 0.3s;
-        }
+        footer { margin-top: auto; padding: 1.5rem; text-align: center; border-radius: 32px 32px 0 0; border-bottom: none; border-left: none; border-right: none; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        footer p { margin: 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 800; letter-spacing: 0.5px; }
 
-        #toast.show {
-            visibility: visible;
-            opacity: 1;
-            bottom: 50px;
-        }
+        #toast-container { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none; width: 90%; max-width: 400px; align-items: center;}
+        .toast { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 50px; font-weight: 600; font-size: 0.95rem; color: #fff; animation: toastEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.5); background: linear-gradient(135deg, rgba(30,30,40,0.9), rgba(15,15,20,0.95)); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); width: fit-content; max-width: 100%; word-wrap: break-word; }
+        .toast.fade-out { animation: toastExit 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes toastEnter { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes toastExit { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(20px) scale(0.9); } }
 
-        /* Modal for QR Code */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            padding: 2rem;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .modal-content h3 {
-            margin-top: 0;
-            font-family: var(--font-code);
-        }
-
-        #qrCodeCanvas {
-            border-radius: 12px;
-            margin: 1rem 0;
-            background: white; /* Ensure contrast for scanning */
-            padding: 10px;
-        }
-
-        .qr-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 1rem;
-            text-align: left;
-        }
-
-        .qr-controls label {
-            font-family: var(--font-code);
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-        
-        .qr-controls input[type="number"], .qr-controls input[type="color"] {
-            padding: 0.8rem;
-        }
-
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 20px; box-sizing: border-box; }
+        .modal-overlay.show { opacity: 1; }
+        .modal-content { padding: 2.5rem; width: 100%; max-width: 420px; text-align: center; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box; }
+        .modal-overlay.show .modal-content { transform: scale(1); }
+        .modal-content h3 { margin-top: 0; font-size: 1.5rem; font-weight: 800; }
+        #qrCodeCanvas { border-radius: 16px; margin: 1.5rem 0; background: white; padding: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 100%; height: auto; }
+        .qr-controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem; text-align: left; }
+        .qr-controls label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <lordicon
-                src="https://cdn.lordicon.com/xhebrhsj.json"
-                trigger="hover"
-                colors="primary:#ffffff,secondary:#7A5FFF"
-                style="width:50px;height:50px">
-            </lordicon>
-            <h1>AceLink</h1>
-        </header>
-
-        <section class="input-section liquid-glass">
-            <div class="form-group">
-                <div class="icon-wrapper">
-                    <lordicon
-                        src="https://cdn.lordicon.com/zzcjjxew.json"
-                        trigger="loop"
-                        delay="2000"
-                        colors="primary:#7A5FFF,secondary:#ffffff"
-                        style="width:24px;height:24px">
-                    </lordicon>
-                </div>
-                <input type="url" id="longUrl" placeholder="Enter long URL (e.g., https://example.com)" required>
-            </div>
-
-            <div class="form-group">
-                <div class="icon-wrapper">
-                    <lordicon
-                        src="https://cdn.lordicon.com/puvaffet.json"
+    <div class="main-wrapper">
+        <div class="container">
+            <header>
+                <div class="header-spacer"></div>
+                <div class="branding">
+                    <lord-icon
+                        src="https://cdn.lordicon.com/xhebrhsj.json"
                         trigger="hover"
-                        colors="primary:#7A5FFF,secondary:#ffffff"
-                        style="width:24px;height:24px">
-                    </lordicon>
+                        style="width:56px;height:56px"
+                        class="themed-icon">
+                    </lord-icon>
+                    <h1>AceLink</h1>
                 </div>
-                <textarea id="mdNote" placeholder="Markdown note (e.g., **Campaign A**)"></textarea>
+                <div class="header-actions">
+                    <button class="theme-toggle liquid-glass" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                        <lord-icon
+                            id="themeIcon"
+                            src="https://cdn.lordicon.com/whtfuqlw.json"
+                            trigger="hover"
+                            style="width:24px;height:24px"
+                            class="themed-icon">
+                        </lord-icon>
+                    </button>
+                </div>
+            </header>
+
+            <section class="input-section liquid-glass">
+                <div class="form-group">
+                    <div class="icon-wrapper">
+                        <lord-icon src="https://cdn.lordicon.com/zzcjjxew.json" trigger="loop" delay="2000" style="width:24px;height:24px" class="themed-icon"></lord-icon>
+                    </div>
+                    <input type="url" id="longUrl" placeholder="Enter long URL (e.g., https://example.com)" required>
+                </div>
+
+                <div class="form-group">
+                    <div class="icon-wrapper">
+                        <lord-icon src="https://cdn.lordicon.com/puvaffet.json" trigger="hover" style="width:24px;height:24px" class="themed-icon"></lord-icon>
+                    </div>
+                    <textarea id="mdNote" placeholder="Markdown note (e.g., **Campaign A** or # Goals)"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div>
+                        <div class="icon-wrapper">
+                            <lord-icon src="https://cdn.lordicon.com/kbtmbyzy.json" trigger="hover" style="width:24px;height:24px" class="themed-icon"></lord-icon>
+                        </div>
+                        <select id="expireSelect">
+                            <option value="never">Never Expires</option>
+                            <option value="24h">Expires in 24 Hours</option>
+                            <option value="7d">Expires in 7 Days</option>
+                            <option value="30d">Expires in 30 Days</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="shortenLink()">
+                    <lord-icon src="https://cdn.lordicon.com/whtfuqlw.json" trigger="hover" colors="primary:#ffffff" style="width:24px;height:24px"></lord-icon>
+                    Shorten & Save
+                </button>
+            </section>
+
+            <div class="search-bar liquid-glass">
+                <div class="icon-wrapper">
+                    <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="hover" style="width:24px;height:24px" class="themed-icon"></lord-icon>
+                </div>
+                <input type="text" id="searchInput" placeholder="Search your history by URL or notes..." oninput="renderHistory()">
             </div>
 
-            <button class="btn-primary" onclick="shortenLink()">
-                <lordicon
-                    src="https://cdn.lordicon.com/whtfuqlw.json"
-                    trigger="hover"
-                    colors="primary:#ffffff"
-                    style="width:24px;height:24px">
-                </lordicon>
-                Shorten & Save
-            </button>
-        </section>
-
-        <section class="history-section">
-            <h2>
-                <lordicon
-                    src="https://cdn.lordicon.com/fpmskzjq.json"
-                    trigger="hover"
-                    colors="primary:#ffffff,secondary:#7A5FFF"
-                    style="width:30px;height:30px">
-                </lordicon>
-                Recent Links
-            </h2>
-            <div id="historyList" class="history-list"></div>
-        </section>
+            <section class="history-section">
+                <h2>
+                    <lord-icon src="https://cdn.lordicon.com/fpmskzjq.json" trigger="hover" style="width:32px;height:32px" class="themed-icon"></lord-icon>
+                    Recent Links
+                </h2>
+                <div id="historyList" class="history-list"></div>
+            </section>
+        </div>
     </div>
 
-    <div id="toast" class="liquid-glass">Copied to clipboard!</div>
+    <footer class="liquid-glass">
+        <lord-icon src="https://cdn.lordicon.com/qhgmpzxh.json" trigger="hover" style="width:24px;height:24px" class="themed-icon"></lord-icon>
+        <p>&copy; 2026 Ace Horizon. All rights reserved.</p>
+    </footer>
+
+    <div id="toast-container"></div>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content liquid-glass">
+            <h3>Edit Link Details</h3>
+            <div class="form-group" style="text-align: left;">
+                <label style="font-size: 0.9rem; color: var(--text-muted); font-weight: 800; margin-bottom: 5px; display: block;">Destination URL:</label>
+                <input type="url" id="editOriginalUrl" placeholder="Update long URL..." style="padding-left: 1.2rem;">
+            </div>
+            <div class="form-group" style="text-align: left;">
+                <label style="font-size: 0.9rem; color: var(--text-muted); font-weight: 800; margin-bottom: 5px; display: block;">Markdown Note:</label>
+                <textarea id="editMdNote" placeholder="Update markdown note..." style="padding-left: 1.2rem; min-height: 100px;"></textarea>
+            </div>
+            <div class="card-actions" style="justify-content: center; margin-top: 20px;">
+                <button class="btn-action" style="background: var(--blurple); border-color: var(--blurple-light); color:white;" onclick="saveEdit()">
+                    <lord-icon src="https://cdn.lordicon.com/whtfuqlw.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px"></lord-icon>
+                    Save Changes
+                </button>
+                <button class="btn-action btn-delete" onclick="closeEditModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <div class="modal-overlay" id="qrModal">
         <div class="modal-content liquid-glass">
-            <h3>QR Code Generator</h3>
+            <h3>QR Configuration</h3>
             <canvas id="qrCodeCanvas"></canvas>
-            
             <div class="qr-controls">
                 <label>Size (px):</label>
-                <input type="number" id="qrSize" value="200" min="100" max="1000" onchange="updateQR()">
-                
+                <input type="number" id="qrSize" value="200" min="100" max="1000" onchange="updateQR()" style="padding-left: 1.2rem;">
                 <label>Color Filter:</label>
-                <input type="color" id="qrColor" value="#5539CC" onchange="updateQR()">
+                <input type="color" id="qrColor" value="#5539CC" onchange="updateQR()" style="padding-left: 1.2rem;">
             </div>
-
-            <div class="card-actions" style="justify-content: center; margin-top: 15px;">
-                <button class="btn-action" onclick="downloadQR()">Download</button>
+            <div class="card-actions" style="justify-content: center; margin-top: 20px;">
+                <button class="btn-action" style="background: var(--blurple); border-color: var(--blurple-light); color:white;" onclick="downloadQR()">
+                    <lord-icon src="https://cdn.lordicon.com/xhdhjyqy.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px"></lord-icon>
+                    Download
+                </button>
                 <button class="btn-action btn-delete" onclick="closeQRModal()">Close</button>
             </div>
         </div>
     </div>
 
     <script>
+        // --- Core Setup & State ---
         const STORAGE_KEY = "acelink_history";
         let linkHistory = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         let currentQRUrl = "";
         let qrInstance = null;
+        let editingLinkId = null;
+        
+        // --- Theme Logic (Dark/Light Mode) ---
+        let isLightMode = localStorage.getItem('acelink_theme') === 'light';
+        if (isLightMode) document.body.classList.add('light-mode');
 
-        function saveHistory() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(linkHistory));
+        function updateLordiconColors() {
+            const icons = document.querySelectorAll('.themed-icon');
+            const colorStr = isLightMode ? 'primary:#121212,secondary:#5539CC' : 'primary:#ffffff,secondary:#7A5FFF';
+            icons.forEach(icon => icon.setAttribute('colors', colorStr));
+            
+            const themeIcon = document.getElementById('themeIcon');
+            if (themeIcon) {
+                themeIcon.setAttribute('src', isLightMode ? "https://cdn.lordicon.com/qwwuyobg.json" : "https://cdn.lordicon.com/whtfuqlw.json");
+            }
         }
+
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            if(isLightMode) {
+                document.body.classList.add('light-mode');
+                localStorage.setItem('acelink_theme', 'light');
+            } else {
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('acelink_theme', 'dark');
+            }
+            updateLordiconColors();
+        }
+        
+        updateLordiconColors();
+
+        // --- Data Management ---
+        function saveHistory() { localStorage.setItem(STORAGE_KEY, JSON.stringify(linkHistory)); }
 
         async function shortenLink() {
             const urlInput = document.getElementById('longUrl');
             const mdInput = document.getElementById('mdNote');
+            const expireVal = document.getElementById('expireSelect').value;
 
             let originalUrl = urlInput.value.trim();
-            if (!originalUrl) {
-                showToast("Please enter a valid URL.");
-                return;
-            }
+            if (!originalUrl) return showToast("Please enter a valid URL.", "error");
+            if (!/^https?:\/\//i.test(originalUrl)) originalUrl = 'https://' + originalUrl;
 
-            if (!/^https?:\/\//i.test(originalUrl)) {
-                originalUrl = 'https://' + originalUrl;
-            }
+            let expiresAt = null;
+            if (expireVal === '24h') expiresAt = new Date(Date.now() + 24*60*60*1000).toISOString();
+            if (expireVal === '7d') expiresAt = new Date(Date.now() + 7*24*60*60*1000).toISOString();
+            if (expireVal === '30d') expiresAt = new Date(Date.now() + 30*24*60*60*1000).toISOString();
 
-            let shortUrl;
-
-            try {
-                // Attempting an API call, fallback to simulated if it fails
-                const response = await fetch('/api/shorten', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        url: originalUrl,
-                        note: mdInput.value.trim()
-                    })
-                });
-
-                if (!response.ok) throw new Error("API unavailable");
-                const data = await response.json();
-                shortUrl = data.shortUrl;
-            } catch (error) {
-                // Fallback to simulated short link utilizing the ace.ln domain
-                const code = Math.random().toString(36).substring(2, 8);
-                shortUrl = `https://ace.ln/${code}`;
-            }
+            let shortUrl = `https://ace.ln/${Math.random().toString(36).substring(2, 8)}`;
+            let uniqueId = Date.now().toString();
 
             linkHistory.unshift({
-                id: Date.now().toString(),
+                id: uniqueId,
                 originalUrl,
                 shortUrl,
                 markdownRaw: mdInput.value.trim() || "*No description provided.*",
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                expiresAt: expiresAt
             });
 
             saveHistory();
             renderHistory();
-
-            urlInput.value = "";
-            mdInput.value = "";
-            showToast("Link shortened & saved!");
+            urlInput.value = ""; mdInput.value = "";
+            showToast("Link shortened successfully!", "success");
         }
 
         function deleteLink(id) {
             linkHistory = linkHistory.filter(link => link.id !== id);
-            saveHistory();
-            renderHistory();
-            showToast("Link deleted.");
+            saveHistory(); renderHistory(); showToast("Link removed permanently.", "trash");
         }
 
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("Copied to clipboard!");
-            });
+            navigator.clipboard.writeText(text).then(() => showToast("Link copied to clipboard!", "success"));
         }
 
-        function showToast(message) {
-            const toast = document.getElementById("toast");
-            toast.innerText = message;
-            toast.className = "liquid-glass show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        // --- Edit Logic ---
+        function openEditModal(id) {
+            const link = linkHistory.find(l => l.id === id);
+            if(!link) return;
+            editingLinkId = id;
+            document.getElementById('editOriginalUrl').value = link.originalUrl;
+            document.getElementById('editMdNote').value = link.markdownRaw;
+            
+            const modal = document.getElementById('editModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
         }
 
-        // --- QR Code Logic ---
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+            editingLinkId = null;
+        }
+
+        function saveEdit() {
+            if(!editingLinkId) return;
+            const link = linkHistory.find(l => l.id === editingLinkId);
+            if(link) {
+                let newUrl = document.getElementById('editOriginalUrl').value.trim();
+                if (!newUrl) return showToast("URL cannot be empty.", "error");
+                if (!/^https?:\/\//i.test(newUrl)) newUrl = 'https://' + newUrl;
+                
+                link.originalUrl = newUrl;
+                link.markdownRaw = document.getElementById('editMdNote').value.trim() || "*No description provided.*";
+                
+                saveHistory();
+                renderHistory();
+                showToast("Link updated successfully!", "success");
+                closeEditModal();
+            }
+        }
+
+        // --- UI Feedback (Toasts) ---
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = "toast";
+            let iconSrc = "https://cdn.lordicon.com/egiwmiit.json"; 
+            if(type === "error") iconSrc = "https://cdn.lordicon.com/bmnlikjh.json"; 
+            if(type === "trash") iconSrc = "https://cdn.lordicon.com/gsqxdxog.json"; 
+
+            toast.innerHTML = `<lord-icon src="${iconSrc}" trigger="in" colors="primary:#7A5FFF,secondary:#ffffff" style="width:24px;height:24px;min-width:24px;"></lord-icon> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.add("fade-out"); toast.addEventListener("animationend", () => toast.remove()); }, 3000);
+        }
+
+        // --- QR Code Modals ---
         function openQRModal(url) {
-            currentQRUrl = url;
-            document.getElementById('qrModal').style.display = 'flex';
-            updateQR();
+            currentQRUrl = url; const modal = document.getElementById('qrModal');
+            modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10); updateQR();
         }
-
         function closeQRModal() {
-            document.getElementById('qrModal').style.display = 'none';
+            const modal = document.getElementById('qrModal');
+            modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300);
         }
-
         function updateQR() {
             const size = parseInt(document.getElementById('qrSize').value) || 200;
             const color = document.getElementById('qrColor').value || '#5539CC';
-            
-            if (!qrInstance) {
-                qrInstance = new QRious({
-                    element: document.getElementById('qrCodeCanvas'),
-                    value: currentQRUrl,
-                    size: size,
-                    foreground: color,
-                    level: 'H'
-                });
-            } else {
-                qrInstance.set({
-                    value: currentQRUrl,
-                    size: size,
-                    foreground: color
-                });
-            }
+            if (!qrInstance) qrInstance = new QRious({ element: document.getElementById('qrCodeCanvas'), value: currentQRUrl, size: size, foreground: color, level: 'H' });
+            else qrInstance.set({ value: currentQRUrl, size: size, foreground: color });
         }
-
         function downloadQR() {
-            const canvas = document.getElementById('qrCodeCanvas');
-            const link = document.createElement('a');
-            link.download = 'AceLink-QR.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            showToast("QR Code downloaded!");
+            const link = document.createElement('a'); link.download = 'AceLink-QR.png';
+            link.href = document.getElementById('qrCodeCanvas').toDataURL('image/png'); link.click();
+            showToast("QR Code downloaded!", "success"); closeQRModal();
         }
 
+        // --- Rendering & Filtering ---
         function renderHistory() {
             const container = document.getElementById("historyList");
+            const searchQuery = document.getElementById("searchInput").value.toLowerCase();
             container.innerHTML = "";
 
-            if (linkHistory.length === 0) {
-                container.innerHTML = '<div class="empty-state liquid-glass">No links shortened yet.</div>';
+            const filteredLinks = linkHistory.filter(link => {
+                return link.originalUrl.toLowerCase().includes(searchQuery) || 
+                       link.shortUrl.toLowerCase().includes(searchQuery) || 
+                       link.markdownRaw.toLowerCase().includes(searchQuery);
+            });
+
+            if (filteredLinks.length === 0) {
+                container.innerHTML = `
+                <div class="empty-state liquid-glass">
+                    <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" delay="2000" class="themed-icon" style="width:60px;height:60px;margin-bottom:15px;"></lord-icon>
+                    <br>No links found.
+                </div>`;
+                updateLordiconColors();
                 return;
             }
 
-            linkHistory.forEach(link => {
+            filteredLinks.forEach(link => {
                 const card = document.createElement("div");
                 card.className = "history-card liquid-glass";
+                
+                let badgeHTML = '';
+                if (link.expiresAt) {
+                    const isExpired = new Date() > new Date(link.expiresAt);
+                    badgeHTML = isExpired ? `<span class="badge expired" title="Expired on ${new Date(link.expiresAt).toLocaleDateString()}">Expired</span>` 
+                                          : `<span class="badge active" title="Expires on ${new Date(link.expiresAt).toLocaleDateString()}">Active</span>`;
+                } else {
+                    badgeHTML = `<span class="badge active">Permanent</span>`;
+                }
+
+                // Generates an actual screenshot of the destination website using thum.io
+                const thumbnailUrl = `https://image.thum.io/get/width/600/crop/800/${link.originalUrl}`;
 
                 card.innerHTML = `
-                    <div class="history-header">
-                        <div>
-                            <a href="${link.originalUrl}" target="_blank" rel="noopener noreferrer" class="short-url">${link.shortUrl}</a>
-                            <div class="original-url">${link.originalUrl}</div>
-                        </div>
+                    <div class="link-thumbnail">
+                        ${badgeHTML}
+                        <img src="${thumbnailUrl}" alt="Thumbnail preview of ${link.originalUrl}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'rgba(255,255,255,0.05)\\'/></svg>'">
                     </div>
                     
-                    <div class="card-actions">
-                        <button class="btn-action" onclick="copyToClipboard('${link.shortUrl}')">
-                            <lordicon src="https://cdn.lordicon.com/nocovwne.json" trigger="hover" colors="primary:#ffffff" style="width:16px;height:16px"></lordicon>
-                            Copy
-                        </button>
-                        <button class="btn-action" onclick="openQRModal('${link.shortUrl}')">
-                            QR Code
-                        </button>
-                        <button class="btn-action btn-delete" onclick="deleteLink('${link.id}')">
-                            Delete
-                        </button>
-                    </div>
-
-                    <div class="markdown-content">
-                        ${marked.parse(link.markdownRaw)}
+                    <div class="history-content">
+                        <a href="${link.originalUrl}" target="_blank" rel="noopener noreferrer" class="short-url">${link.shortUrl}</a>
+                        <div class="original-url">${link.originalUrl}</div>
+                        
+                        <div class="card-actions">
+                            <button class="btn-action" onclick="copyToClipboard('${link.shortUrl}')">
+                                <lord-icon src="https://cdn.lordicon.com/nocovwne.json" trigger="hover" class="themed-icon" style="width:18px;height:18px"></lord-icon>
+                                Copy
+                            </button>
+                            <button class="btn-action" onclick="openEditModal('${link.id}')">
+                                <lord-icon src="https://cdn.lordicon.com/puvaffet.json" trigger="hover" class="themed-icon" style="width:18px;height:18px"></lord-icon>
+                                Edit
+                            </button>
+                            <button class="btn-action" onclick="openQRModal('${link.shortUrl}')">
+                                <lord-icon src="https://cdn.lordicon.com/whtfuqlw.json" trigger="hover" class="themed-icon" style="width:18px;height:18px"></lord-icon>
+                                QR Code
+                            </button>
+                            <button class="btn-action btn-delete" onclick="deleteLink('${link.id}')">
+                                <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="hover" class="themed-icon" style="width:18px;height:18px"></lord-icon>
+                                Delete
+                            </button>
+                        </div>
+                        <div class="markdown-content">${marked.parse(link.markdownRaw)}</div>
                     </div>
                 `;
-
                 container.appendChild(card);
             });
+            updateLordiconColors(); 
         }
 
-        // Initial render
         renderHistory();
     </script>
 </body>
