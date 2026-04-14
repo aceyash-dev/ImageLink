@@ -3,394 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AceLink - Smart URL Shortener</title>
+    <title>Ace Workspace - Links & Images</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@500;700&family=Montserrat:wght@600;800&family=Outfit:wght@800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,600,0,0" rel="stylesheet" />
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         :root {
-            /* Core Colors */
-            --blurple: #5539CC;
-            --blurple-light: #7A5FFF;
-            
-            /* Dark Theme Variables */
-            --bg-base: #0a0a0c;
-            --text-main: #ffffff;
-            --text-muted: #a1a1aa;
+            --blurple: #5539CC; --blurple-light: #7A5FFF; --violet: #8A2BE2;
+            --solid-cyan: #0DF8FF; --danger: #FF2A5F; --success: #00ff9d;
+            --bg-base: #0a0a0c; --text-main: #ffffff; --text-muted: #a1a1aa;
             --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-border-light: rgba(255, 255, 255, 0.15);
-            --glass-shadow: rgba(0, 0, 0, 0.6);
-            --input-bg: rgba(0, 0, 0, 0.4);
-            --md-bg: rgba(0, 0, 0, 0.25);
-            --btn-action-bg: rgba(255, 255, 255, 0.04);
-            --btn-action-hover: rgba(255, 255, 255, 0.12);
-            
-            /* Typography */
-            --font-code: 'Space Grotesk', monospace;
-            --font-ui: 'Plus Jakarta Sans', sans-serif;
+            --glass-border: rgba(255, 255, 255, 0.08); --glass-border-light: rgba(255, 255, 255, 0.15);
+            --glass-shadow: rgba(0, 0, 0, 0.6); --input-bg: rgba(0, 0, 0, 0.4);
+            --md-bg: rgba(0, 0, 0, 0.25); --btn-action-bg: rgba(255, 255, 255, 0.04);
+            --btn-action-hover: rgba(255, 255, 255, 0.12); --card-bg: rgba(0, 0, 0, 0.6);
+            --font-code: 'Space Grotesk', monospace; --font-ui: 'Plus Jakarta Sans', sans-serif; --font-display: 'Outfit', sans-serif;
         }
 
-        /* Light Theme Override Variables */
         body.light-mode {
-            --bg-base: #f4f4f8;
-            --text-main: #121212;
-            --text-muted: #52525b;
+            --bg-base: #f4f4f8; --text-main: #121212; --text-muted: #52525b;
             --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%);
-            --glass-border: rgba(0, 0, 0, 0.05);
-            --glass-border-light: rgba(255, 255, 255, 0.8);
-            --glass-shadow: rgba(0, 0, 0, 0.08);
-            --input-bg: rgba(255, 255, 255, 0.7);
-            --md-bg: rgba(255, 255, 255, 0.6);
-            --btn-action-bg: rgba(0, 0, 0, 0.03);
-            --btn-action-hover: rgba(0, 0, 0, 0.08);
+            --glass-border: rgba(0, 0, 0, 0.05); --glass-border-light: rgba(255, 255, 255, 0.8);
+            --glass-shadow: rgba(0, 0, 0, 0.08); --input-bg: rgba(255, 255, 255, 0.7);
+            --md-bg: rgba(255, 255, 255, 0.6); --btn-action-bg: rgba(0, 0, 0, 0.03);
+            --btn-action-hover: rgba(0, 0, 0, 0.08); --card-bg: rgba(255, 255, 255, 0.9); --solid-cyan: #00B4D8;
         }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: var(--font-ui);
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: background-color 0.4s ease, color 0.4s ease;
-        }
-
-        /* Animated Mesh Gradient Background (Blurple, Violet, Red) */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(circle at 15% 50%, rgba(85, 57, 204, 0.25), transparent 50%),
-                radial-gradient(circle at 85% 30%, rgba(138, 43, 226, 0.25), transparent 50%),
-                radial-gradient(circle at 50% 80%, rgba(255, 50, 50, 0.15), transparent 60%);
-            background-size: 200% 200%;
-            z-index: -1;
-            filter: blur(50px);
-            animation: meshFlow 15s ease-in-out infinite alternate;
-            transition: opacity 0.4s ease;
-        }
-
-        body.light-mode::before {
-            background:
-                radial-gradient(circle at 15% 50%, rgba(85, 57, 204, 0.15), transparent 50%),
-                radial-gradient(circle at 85% 30%, rgba(138, 43, 226, 0.15), transparent 50%),
-                radial-gradient(circle at 50% 80%, rgba(255, 50, 50, 0.1), transparent 60%);
-            background-size: 200% 200%;
-        }
-
-        @keyframes meshFlow {
-            0% { background-position: 0% 0%; }
-            50% { background-position: 100% 100%; }
-            100% { background-position: 0% 100%; }
-        }
+        body, html { margin: 0; padding: 0; font-family: var(--font-ui); background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; transition: background-color 0.4s ease, color 0.4s ease; overflow-x: hidden; }
+        #particles-js { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -2; will-change: transform; }
+        body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 15% 50%, rgba(85, 57, 204, 0.35), transparent 50%), radial-gradient(circle at 85% 30%, rgba(138, 43, 226, 0.35), transparent 50%), radial-gradient(circle at 50% 80%, rgba(255, 42, 95, 0.25), transparent 60%); background-size: 200% 200%; filter: blur(60px); animation: meshFlow 15s ease-in-out infinite alternate; transition: opacity 0.4s ease; will-change: background-position; }
+        body.light-mode::before { background: radial-gradient(circle at 15% 50%, rgba(85, 57, 204, 0.2), transparent 50%), radial-gradient(circle at 85% 30%, rgba(138, 43, 226, 0.2), transparent 50%), radial-gradient(circle at 50% 80%, rgba(255, 42, 95, 0.15), transparent 60%); }
+        @keyframes meshFlow { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 100%; } }
 
         .main-wrapper { flex: 1; display: flex; flex-direction: column; }
-        .container {
-            max-width: 800px; margin: 0 auto; padding: 3rem 2rem 5rem 2rem; width: 100%; box-sizing: border-box;
-        }
+        .container { max-width: 900px; margin: 0 auto; padding: 2rem; width: 100%; box-sizing: border-box; }
+        .liquid-glass { background: var(--glass-bg); backdrop-filter: blur(35px) saturate(160%); -webkit-backdrop-filter: blur(35px) saturate(160%); border: 1px solid var(--glass-border); border-top: 1px solid var(--glass-border-light); border-left: 1px solid var(--glass-border-light); box-shadow: 0 16px 40px -10px var(--glass-shadow); border-radius: 24px; transition: all 0.4s ease; }
+        .material-symbols-rounded { vertical-align: middle; font-size: 1.2rem; }
 
-        /* Liquid Glass UI */
-        .liquid-glass {
-            background: var(--glass-bg);
-            backdrop-filter: blur(35px) saturate(160%);
-            -webkit-backdrop-filter: blur(35px) saturate(160%);
-            border: 1px solid var(--glass-border);
-            border-top: 1px solid var(--glass-border-light);
-            border-left: 1px solid var(--glass-border-light);
-            box-shadow: 0 16px 40px -10px var(--glass-shadow);
-            border-radius: 24px;
-            transition: all 0.4s ease;
-        }
+        header { display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem; width: 100%; gap: 1.5rem; }
+        .header-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%; }
+        .branding { display: flex; align-items: center; justify-content: center; gap: 16px; }
+        .header-actions { display: flex; justify-content: flex-end; gap: 10px;}
+        .tabs { display: flex; gap: 10px; background: var(--input-bg); padding: 8px; border-radius: 20px; border: 1px solid var(--glass-border); }
+        .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 24px; border-radius: 14px; font-family: var(--font-ui); font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
+        .tab-btn.active { background: linear-gradient(135deg, var(--blurple-light), var(--blurple)); color: white; box-shadow: 0 4px 15px rgba(85, 57, 204, 0.4); }
+        .tab-btn:not(.active):hover { color: var(--text-main); background: var(--btn-action-hover); }
 
-        /* Fixed Header Layout via CSS Grid */
-        header {
-            display: grid; 
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center; 
-            margin-bottom: 3rem; 
-            width: 100%;
-        }
-
-        .header-spacer {
-            /* Empty div to balance grid */
-        }
-
-        .branding {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-        }
-
-        .header-actions {
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .theme-toggle {
-            background: none; border: none; cursor: pointer; padding: 10px; border-radius: 50%;
-            transition: background 0.3s; display: flex; align-items: center; justify-content: center;
-        }
+        .new-badge { background: var(--danger); color: white; font-size: 0.65rem; padding: 3px 8px; border-radius: 8px; font-weight: 800; letter-spacing: 0.5px; margin-left: 4px; animation: pulseBadge 2s infinite; will-change: box-shadow; }
+        @keyframes pulseBadge { 0% { box-shadow: 0 0 0 0 rgba(255, 42, 95, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(255, 42, 95, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 42, 95, 0); } }
+        .theme-toggle { background: none; border: none; cursor: pointer; padding: 10px; border-radius: 50%; transition: background 0.3s; display: flex; align-items: center; justify-content: center; }
         .theme-toggle:hover { background: var(--btn-action-hover); }
 
-        /* Animated Solid Header Text */
-        h1 {
-            font-family: var(--font-ui); font-size: 3rem; margin: 0; font-weight: 800; letter-spacing: -1px;
-            color: var(--text-main);
-            animation: headerGlow 3s ease-in-out infinite alternate;
-        }
+        h1 { font-family: var(--font-display); font-size: 2.8rem; margin: 0; font-weight: 800; letter-spacing: -1px; color: var(--text-main); animation: headerGlow 3s ease-in-out infinite alternate; will-change: text-shadow, transform; }
+        @keyframes headerGlow { 0% { text-shadow: 0 0 10px rgba(122, 95, 255, 0.1); transform: translateY(0); } 100% { text-shadow: 0 0 25px rgba(122, 95, 255, 0.6), 0 0 50px rgba(85, 57, 204, 0.3); transform: translateY(-2px); } }
+        body.light-mode h1 { animation: headerGlowLight 3s ease-in-out infinite alternate; }
+        @keyframes headerGlowLight { 0% { text-shadow: 0 0 10px rgba(122, 95, 255, 0.1); transform: translateY(0); } 100% { text-shadow: 0 0 20px rgba(122, 95, 255, 0.4); transform: translateY(-2px); } }
 
-        @keyframes headerGlow {
-            0% { text-shadow: 0 0 10px rgba(122, 95, 255, 0.1); transform: translateY(0); }
-            100% { text-shadow: 0 0 25px rgba(122, 95, 255, 0.6), 0 0 50px rgba(85, 57, 204, 0.3); transform: translateY(-2px); }
-        }
-
-        body.light-mode h1 {
-            animation: headerGlowLight 3s ease-in-out infinite alternate;
-        }
-        @keyframes headerGlowLight {
-            0% { text-shadow: 0 0 10px rgba(122, 95, 255, 0.1); transform: translateY(0); }
-            100% { text-shadow: 0 0 20px rgba(122, 95, 255, 0.4); transform: translateY(-2px); }
-        }
-
+        /* Shared Form Styles */
         .input-section { padding: 2.5rem; margin-bottom: 2rem; }
         .form-group { margin-bottom: 1.5rem; position: relative; }
-        .form-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
-        .form-row > div { flex: 1; position: relative; }
-
+        .form-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .form-row > div { flex: 1; position: relative; min-width: 250px;}
         .icon-wrapper { position: absolute; top: 14px; left: 16px; pointer-events: none; display: flex; align-items: center;}
 
-        input[type="url"], input[type="text"], input[type="number"], input[type="color"], textarea, select {
-            width: 100%; background: var(--input-bg); border: 1px solid var(--glass-border);
-            border-radius: 16px; padding: 1.2rem 1.2rem 1.2rem 3.5rem; color: var(--text-main);
-            font-family: var(--font-code); font-size: 1rem; box-sizing: border-box; transition: all 0.3s;
-            appearance: none;
-        }
-        
+        input[type="url"], input[type="text"], input[type="number"], input[type="color"], textarea, select { width: 100%; background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.2rem 1.2rem 1.2rem 3.5rem; color: var(--text-main); font-family: var(--font-code); font-size: 1rem; box-sizing: border-box; transition: all 0.3s; appearance: none; }
         select { padding-left: 3.5rem; cursor: pointer; font-family: var(--font-ui); font-weight: 600;}
         select option { background: var(--bg-base); color: var(--text-main); }
-
-        input:focus, textarea:focus, select:focus {
-            outline: none; border-color: var(--blurple-light); background: var(--input-bg);
-            box-shadow: 0 0 0 4px rgba(122, 95, 255, 0.15);
-        }
-
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--blurple-light); background: var(--input-bg); box-shadow: 0 0 0 4px rgba(122, 95, 255, 0.15); }
         textarea { resize: vertical; min-height: 120px; font-family: var(--font-ui);}
 
-        .btn-primary {
-            display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;
-            background: linear-gradient(135deg, var(--blurple-light), var(--blurple)); color: white;
-            border: none; padding: 1.2rem; font-family: var(--font-ui); font-size: 1.1rem; font-weight: 800;
-            border-radius: 16px; cursor: pointer; box-shadow: 0 8px 25px -5px rgba(85, 57, 204, 0.5);
-            transition: all 0.3s ease;
-        }
+        /* Live Preview Widget */
+        .live-preview-box { background: var(--md-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1rem; margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; animation: fadeIn 0.3s ease; }
+        .preview-img { width: 70px; height: 70px; object-fit: cover; border-radius: 10px; background: #000; }
+        .preview-text { display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex: 1; }
+        .preview-text strong { font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); font-family: var(--font-display); }
+        .preview-text p { font-size: 0.8rem; color: var(--text-muted); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        .btn-primary { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; background: linear-gradient(135deg, var(--blurple-light), var(--blurple)); color: white; border: none; padding: 1.2rem; font-family: var(--font-ui); font-size: 1.1rem; font-weight: 800; border-radius: 16px; cursor: pointer; box-shadow: 0 8px 25px -5px rgba(85, 57, 204, 0.5); transition: all 0.3s ease; will-change: transform, box-shadow; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -5px rgba(85, 57, 204, 0.7); }
+        .btn-danger-outline { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger); border-radius: 12px; padding: 10px 16px; font-weight: 800; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px;}
+        .btn-danger-outline:hover { background: var(--danger); color: white; }
 
         .search-bar { margin-bottom: 2rem; position: relative; }
         .search-bar input { padding-left: 3.5rem; font-family: var(--font-ui); font-weight: 600; }
-
-        .history-section h2 {
-            font-family: var(--font-ui); font-size: 1.6rem; font-weight: 800;
-            border-bottom: 1px solid var(--glass-border); padding-bottom: 1.2rem; margin-bottom: 1.5rem;
-            display: flex; align-items: center; gap: 12px;
-        }
-
+        .history-section h2 { font-family: var(--font-ui); font-size: 1.6rem; font-weight: 800; border-bottom: 1px solid var(--glass-border); padding-bottom: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 12px; justify-content: space-between;}
         .history-list { display: flex; flex-direction: column; gap: 2rem; }
-        
-        .history-card { 
-            padding: 2rem; 
-            transition: transform 0.3s ease; 
-            position: relative; 
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        .history-card { padding: 2rem; transition: transform 0.3s ease; position: relative; box-sizing: border-box; display: flex; flex-direction: column; gap: 15px; will-change: transform; }
         .history-card:hover { transform: translateY(-4px); }
-
-        .link-thumbnail {
-            width: 100%;
-            height: 200px;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid var(--glass-border);
-            position: relative;
-            background: rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .link-thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-            color: transparent; /* hides alt text if loading */
-        }
-
-        .history-card:hover .link-thumbnail img {
-            transform: scale(1.05);
-        }
-
-        .badge {
-            position: absolute; top: 15px; right: 15px; padding: 6px 12px; border-radius: 10px;
-            font-size: 0.8rem; font-weight: 800; font-family: var(--font-ui); text-transform: uppercase;
-            backdrop-filter: blur(10px); z-index: 2;
-        }
+        .history-card.is-pinned { border-color: var(--blurple-light); box-shadow: 0 0 20px rgba(85, 57, 204, 0.15); }
+        .link-thumbnail { width: 100%; height: 200px; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); position: relative; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
+        .link-thumbnail img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; color: transparent; will-change: transform; }
+        .history-card:hover .link-thumbnail img { transform: scale(1.05); }
+        
+        .badge { position: absolute; top: 15px; right: 15px; padding: 6px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; font-family: var(--font-ui); text-transform: uppercase; backdrop-filter: blur(10px); z-index: 2; }
         .badge.active { background: rgba(34, 197, 94, 0.8); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }
         .badge.expired { background: rgba(239, 68, 68, 0.8); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); }
 
-        .history-content {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            min-width: 0;
-        }
-
-        .short-url {
-            font-family: var(--font-code); color: var(--blurple-light); font-size: 1.5rem; font-weight: 700;
-            text-decoration: none; transition: all 0.2s;
-            word-wrap: break-word; overflow-wrap: break-word; word-break: break-all;
-        }
+        .history-content { display: flex; flex-direction: column; width: 100%; min-width: 0; }
+        .short-url { font-family: var(--font-code); color: var(--blurple-light); font-size: 1.5rem; font-weight: 700; text-decoration: none; transition: all 0.2s; word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; }
         .short-url:hover { text-decoration: underline; color: var(--blurple); }
-
-        .original-url { 
-            color: var(--text-muted); font-size: 0.95rem; margin: 0.5rem 0 1rem 0; font-family: var(--font-code); 
-            word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; opacity: 0.8;
-        }
+        .original-url { color: var(--text-muted); font-size: 0.95rem; margin: 0.5rem 0 1rem 0; font-family: var(--font-code); word-wrap: break-word; overflow-wrap: break-word; word-break: break-all; opacity: 0.8; }
 
         .card-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-        .btn-action {
-            background: var(--btn-action-bg); border: 1px solid var(--glass-border); color: var(--text-main);
-            padding: 8px 16px; border-radius: 12px; cursor: pointer; font-family: var(--font-ui);
-            font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
-        }
+        .btn-action { background: var(--btn-action-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 8px 16px; border-radius: 12px; cursor: pointer; font-family: var(--font-ui); font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
         .btn-action:hover { background: var(--btn-action-hover); border-color: var(--glass-border-light); }
         .btn-delete:hover { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #ff8a8a; }
 
-        .markdown-content {
-            background: var(--md-bg); border-left: 4px solid var(--blurple); padding: 1.5rem;
-            border-radius: 0 16px 16px 0; font-size: 0.95rem; line-height: 1.7; color: var(--text-main);
-            word-wrap: break-word; overflow-wrap: break-word; overflow: hidden; font-family: var(--font-ui);
-        }
-        .markdown-content p { margin-top: 0; }
-        .markdown-content p:last-child { margin-bottom: 0; }
+        .markdown-content { background: var(--md-bg); border-left: 4px solid var(--blurple); padding: 1.5rem; border-radius: 0 16px 16px 0; font-size: 0.95rem; line-height: 1.7; color: var(--text-main); word-wrap: break-word; overflow-wrap: break-word; overflow: hidden; }
         .markdown-content a { color: var(--blurple-light); font-weight: 800; text-decoration: none; }
-        .markdown-content a:hover { text-decoration: underline; }
-        .markdown-content code { background: var(--glass-border); padding: 3px 8px; border-radius: 6px; font-size: 0.85em; font-family: var(--font-code); word-wrap: break-word; }
+        .markdown-content code { background: var(--glass-border); padding: 3px 8px; border-radius: 6px; font-size: 0.85em; font-family: var(--font-code); }
 
+        /* Images Tab Specifics */
+        .dropzone { border: 3px dashed var(--blurple); border-radius: 20px; padding: 3rem 1rem; text-align: center; cursor: pointer; background: rgba(85, 57, 204, 0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s; margin-bottom: 2rem;}
+        .dropzone p { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; color: var(--text-main); margin:0;}
+        .dropzone:hover, .dropzone.dragover { transform: scale(1.02); border-style: solid; background: rgba(85, 57, 204, 0.15); }
+        .queue-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+        .queue-item { background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem; animation: popCard 0.4s forwards; will-change: transform, opacity; }
+        .queue-item:hover { transform: translateY(-4px); border-color: var(--blurple-light); }
+        @keyframes popCard { 0% { opacity: 0; transform: scale(0.95) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+
+        .item-preview { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; background: #000; border: 1px solid var(--glass-border); }
+        .item-header { display: flex; justify-content: space-between; align-items: center; }
+        .name-input { background: transparent; border: 1px dashed transparent; color: var(--text-main); font-size: 1rem; font-weight: 800; font-family: var(--font-ui); width: 60%; outline: none; transition: 0.3s; padding: 4px; padding-left: 0;}
+        .name-input:hover, .name-input:focus { border-color: var(--blurple); background: var(--input-bg); border-radius: 6px; padding-left: 8px;}
+        .progress-track { width: 100%; height: 8px; background: var(--input-bg); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--solid-cyan), var(--blurple)); transition: width 0.3s ease-out; }
+
+        .links-container { display: none; flex-direction: column; gap: 0.8rem; }
+        .links-container.active { display: flex; }
+        .link-group { display: flex; gap: 0.5rem; }
+        .link-group input { flex: 1; padding: 0.8rem; background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 12px; color: var(--text-main); font-family: var(--font-code); font-size: 0.85rem; outline: none; }
+        .action-bar { display: flex; gap: 0.4rem; justify-content: space-between; flex-wrap: wrap;}
+        .action-bar .btn-action { flex: 1; justify-content: center; font-size: 0.8rem; padding: 8px;}
+
+        /* Image Editor Modal specific */
+        .editor-workspace { display: flex; flex-direction: column; gap: 1rem; }
+        .canvas-container { width: 100%; height: 400px; background: repeating-conic-gradient(rgba(255,255,255,0.1) 0% 25%, transparent 0% 50%) 50% / 20px 20px; border-radius: 12px; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; border: 2px solid var(--blurple); cursor: crosshair; }
+        body.light-mode .canvas-container { background: repeating-conic-gradient(rgba(0,0,0,0.1) 0% 25%, transparent 0% 50%) 50% / 20px 20px; }
+        canvas { max-width: 100%; max-height: 100%; object-fit: contain; }
+        #cropBox { position: absolute; border: 2px dashed var(--solid-cyan); background: rgba(13, 248, 255, 0.25); display: none; pointer-events: none; }
+
+        .editor-sidebar { background: var(--input-bg); padding: 1.5rem; border-radius: 16px; display: flex; flex-direction: column; gap: 1rem; border: 1px solid var(--glass-border); }
+        .control-group { display: flex; flex-direction: column; gap: 0.3rem; }
+        .control-row { display: flex; gap: 0.5rem; align-items: center; }
+        .control-group label { font-size: 0.75rem; color: var(--blurple-light); font-weight: 800; text-transform: uppercase; }
+        .control-group input[type="text"], .control-group input[type="number"], .control-group select { padding: 0.6rem; padding-left: 0.8rem; font-weight: bold; border-radius: 8px;}
+        input[type="range"] { accent-color: var(--blurple); }
+        .checkbox-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer; color: var(--text-main); font-weight: 800;}
+
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 20px; box-sizing: border-box; will-change: opacity; }
+        .modal-overlay.show { opacity: 1; display: flex; }
+        .modal-content { padding: 2.5rem; width: 100%; max-width: 420px; text-align: center; transform: scale(0.95); transition: transform 0.3s; box-sizing: border-box; will-change: transform; }
+        .modal-overlay.show .modal-content { transform: scale(1); }
+        .modal-content.large { max-width: 1000px; max-height: 95vh; overflow-y: auto; display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; text-align: left;}
+        @media (max-width: 800px) { .modal-content.large { grid-template-columns: 1fr; } }
+        .modal-content h3 { margin-top: 0; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; justify-content: center;}
+        .modal-content.large h3 { justify-content: flex-start; }
+
+        /* General UI */
+        #qrCodeCanvasLink { border-radius: 16px; margin: 1.5rem 0; background: white; padding: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 100%; height: auto; }
+        #qrcodeImage { background: white; padding: 1rem; border-radius: 12px; margin: 1rem auto; display: inline-block;}
+        .qr-controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem; text-align: left; }
         .empty-state { text-align: center; color: var(--text-muted); padding: 4rem 2rem; font-weight: 600; }
-
-        footer { margin-top: auto; padding: 1.5rem; text-align: center; border-radius: 32px 32px 0 0; border-bottom: none; border-left: none; border-right: none; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        footer { margin-top: auto; padding: 1.5rem; text-align: center; border-radius: 32px 32px 0 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; }
         footer p { margin: 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 800; letter-spacing: 0.5px; }
 
+        /* Toasts */
         #toast-container { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none; width: 90%; max-width: 400px; align-items: center;}
         .toast { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-radius: 50px; font-weight: 600; font-size: 0.95rem; color: #fff; animation: toastEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.5); background: linear-gradient(135deg, rgba(30,30,40,0.9), rgba(15,15,20,0.95)); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); width: fit-content; max-width: 100%; word-wrap: break-word; }
-        .toast.fade-out { animation: toastExit 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .toast.fade-out { animation: toastExit 0.3s forwards; }
         @keyframes toastEnter { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes toastExit { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(20px) scale(0.9); } }
 
-        /* Modals */
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; padding: 20px; box-sizing: border-box; }
-        .modal-overlay.show { opacity: 1; }
-        .modal-content { padding: 2.5rem; width: 100%; max-width: 420px; text-align: center; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box; }
-        .modal-overlay.show .modal-content { transform: scale(1); }
-        .modal-content h3 { margin-top: 0; font-size: 1.5rem; font-weight: 800; }
-        #qrCodeCanvas { border-radius: 16px; margin: 1.5rem 0; background: white; padding: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 100%; height: auto; }
-        .qr-controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem; text-align: left; }
-        .qr-controls label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; will-change: opacity, transform; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);} }
     </style>
 </head>
 <body>
+    <div id="particles-js"></div>
+
     <div class="main-wrapper">
         <div class="container">
             <header>
-                <div class="header-spacer"></div>
-                <div class="branding">
-                    <lord-icon
-                        src="https://cdn.lordicon.com/xhebrhsj.json"
-                        trigger="hover"
-                        style="width:56px;height:56px"
-                        class="themed-icon">
-                    </lord-icon>
-                    <h1>AceLink</h1>
+                <div class="header-top">
+                    <div></div>
+                    <div class="branding">
+                        <lord-icon src="https://cdn.lordicon.com/xhebrhsj.json" trigger="hover" style="width:48px;height:48px" class="themed-icon"></lord-icon>
+                        <h1>Ace Workspace</h1>
+                    </div>
+                    <div class="header-actions">
+                        <button class="theme-toggle liquid-glass" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                            <span class="material-symbols-rounded" id="themeIcon">light_mode</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="header-actions">
-                    <button class="theme-toggle liquid-glass" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
-                        <lord-icon
-                            id="themeIcon"
-                            src="https://cdn.lordicon.com/whtfuqlw.json"
-                            trigger="hover"
-                            style="width:24px;height:24px"
-                            class="themed-icon">
-                        </lord-icon>
-                    </button>
+                
+                <div class="tabs liquid-glass">
+                    <button class="tab-btn active" id="tab-links" onclick="switchTab('links')"><span class="material-symbols-rounded">link</span> Link Shortener</button>
+                    <button class="tab-btn" id="tab-images" onclick="switchTab('images')"><span class="material-symbols-rounded">image</span> Image Host <span class="new-badge">NEW</span></button>
                 </div>
             </header>
 
-            <section class="input-section liquid-glass">
-                <div class="form-group">
-                    <div class="icon-wrapper">
-                        <lord-icon src="https://cdn.lordicon.com/zzcjjxew.json" trigger="loop" delay="2000" style="width:24px;height:24px" class="themed-icon"></lord-icon>
+            <div id="content-links" class="tab-content active">
+                <section class="input-section liquid-glass">
+                    <div class="form-group">
+                        <div class="icon-wrapper"><lord-icon src="https://cdn.lordicon.com/zzcjjxew.json" trigger="loop" delay="2000" style="width:24px;height:24px" class="themed-icon"></lord-icon></div>
+                        <input type="url" id="longUrl" placeholder="Enter long URL (e.g., https://example.com)" required>
                     </div>
-                    <input type="url" id="longUrl" placeholder="Enter long URL (e.g., https://example.com)" required>
-                </div>
+                    
+                    <div id="livePreviewContainer" class="live-preview-box" style="display: none;"></div>
 
-                <div class="form-group">
-                    <div class="icon-wrapper">
-                        <lord-icon src="https://cdn.lordicon.com/puvaffet.json" trigger="hover" style="width:24px;height:24px" class="themed-icon"></lord-icon>
+                    <div class="form-group">
+                        <div class="icon-wrapper"><lord-icon src="https://cdn.lordicon.com/puvaffet.json" trigger="hover" style="width:24px;height:24px" class="themed-icon"></lord-icon></div>
+                        <textarea id="mdNote" placeholder="Markdown note (e.g., **Campaign A** or # Goals)"></textarea>
                     </div>
-                    <textarea id="mdNote" placeholder="Markdown note (e.g., **Campaign A** or # Goals)"></textarea>
-                </div>
-                
-                <div class="form-row">
-                    <div>
-                        <div class="icon-wrapper">
-                            <lord-icon src="https://cdn.lordicon.com/kbtmbyzy.json" trigger="hover" style="width:24px;height:24px" class="themed-icon"></lord-icon>
+                    
+                    <div class="form-row">
+                        <div>
+                            <div class="icon-wrapper"><span class="material-symbols-rounded">badge</span></div>
+                            <input type="text" id="customAlias" pattern="[a-zA-Z0-9-]+" placeholder="Custom Alias (Optional)">
                         </div>
-                        <select id="expireSelect">
-                            <option value="never">Never Expires</option>
-                            <option value="24h">Expires in 24 Hours</option>
-                            <option value="7d">Expires in 7 Days</option>
-                            <option value="30d">Expires in 30 Days</option>
-                        </select>
+                        <div>
+                            <div class="icon-wrapper"><lord-icon src="https://cdn.lordicon.com/kbtmbyzy.json" trigger="hover" style="width:24px;height:24px" class="themed-icon"></lord-icon></div>
+                            <select id="expireSelect">
+                                <option value="never">Never Expires</option>
+                                <option value="24h">Expires in 24 Hours</option>
+                                <option value="7d">Expires in 7 Days</option>
+                                <option value="30d">Expires in 30 Days</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <button class="btn-primary" onclick="shortenLink()">
+                        <span class="material-symbols-rounded">rocket_launch</span>
+                        Shorten & Save
+                    </button>
+                </section>
+
+                <div class="search-bar liquid-glass">
+                    <div class="icon-wrapper"><lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="hover" style="width:24px;height:24px" class="themed-icon"></lord-icon></div>
+                    <input type="text" id="searchInput" placeholder="Search your history by URL or notes..." oninput="renderLinkHistory()">
                 </div>
 
-                <button class="btn-primary" onclick="shortenLink()">
-                    <lord-icon src="https://cdn.lordicon.com/whtfuqlw.json" trigger="hover" colors="primary:#ffffff" style="width:24px;height:24px"></lord-icon>
-                    Shorten & Save
-                </button>
-            </section>
-
-            <div class="search-bar liquid-glass">
-                <div class="icon-wrapper">
-                    <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="hover" style="width:24px;height:24px" class="themed-icon"></lord-icon>
-                </div>
-                <input type="text" id="searchInput" placeholder="Search your history by URL or notes..." oninput="renderHistory()">
+                <section class="history-section">
+                    <h2>
+                        <span><lord-icon src="https://cdn.lordicon.com/fpmskzjq.json" trigger="hover" style="width:32px;height:32px" class="themed-icon"></lord-icon> Recent Links</span>
+                    </h2>
+                    <div id="linkHistoryList" class="history-list"></div>
+                </section>
             </div>
 
-            <section class="history-section">
-                <h2>
-                    <lord-icon src="https://cdn.lordicon.com/fpmskzjq.json" trigger="hover" style="width:32px;height:32px" class="themed-icon"></lord-icon>
-                    Recent Links
-                </h2>
-                <div id="historyList" class="history-list"></div>
-            </section>
+            <div id="content-images" class="tab-content">
+                <div class="liquid-glass" style="padding: 2rem; margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="margin:0; display:flex; align-items:center; gap:10px;"><lord-icon src="https://cdn.lordicon.com/vixtkkbk.json" trigger="loop" delay="2000" class="themed-icon" style="width:32px;height:32px"></lord-icon> Upload Images</h2>
+                        <button class="btn-danger-outline" onclick="clearImageHistory()">
+                            <span class="material-symbols-rounded">delete_sweep</span> Clear History
+                        </button>
+                    </div>
+                    
+                    <div class="dropzone" id="dropzone">
+                        <lord-icon src="https://cdn.lordicon.com/vixtkkbk.json" trigger="loop" delay="2000" class="themed-icon" style="width:75px;height:75px"></lord-icon>
+                        <p>DRAG & DROP IMAGES</p>
+                        <span style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">OR CLICK TO BROWSE</span>
+                        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+                    </div>
+                </div>
+
+                <div class="queue-container" id="imageQueueContainer"></div>
+            </div>
+
         </div>
     </div>
 
@@ -401,57 +296,106 @@
 
     <div id="toast-container"></div>
 
-    <div class="modal-overlay" id="editModal">
+    <div class="modal-overlay" id="editLinkModal">
         <div class="modal-content liquid-glass">
-            <h3>Edit Link Details</h3>
+            <h3><span class="material-symbols-rounded">edit_square</span> Edit Link</h3>
             <div class="form-group" style="text-align: left;">
                 <label style="font-size: 0.9rem; color: var(--text-muted); font-weight: 800; margin-bottom: 5px; display: block;">Destination URL:</label>
-                <input type="url" id="editOriginalUrl" placeholder="Update long URL..." style="padding-left: 1.2rem;">
+                <input type="url" id="editOriginalUrl" placeholder="Update long URL...">
             </div>
             <div class="form-group" style="text-align: left;">
                 <label style="font-size: 0.9rem; color: var(--text-muted); font-weight: 800; margin-bottom: 5px; display: block;">Markdown Note:</label>
-                <textarea id="editMdNote" placeholder="Update markdown note..." style="padding-left: 1.2rem; min-height: 100px;"></textarea>
+                <textarea id="editMdNote" placeholder="Update markdown note..." style="min-height: 100px; padding-left: 1.2rem;"></textarea>
             </div>
             <div class="card-actions" style="justify-content: center; margin-top: 20px;">
-                <button class="btn-action" style="background: var(--blurple); border-color: var(--blurple-light); color:white;" onclick="saveEdit()">
-                    <lord-icon src="https://cdn.lordicon.com/whtfuqlw.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px"></lord-icon>
-                    Save Changes
-                </button>
-                <button class="btn-action btn-delete" onclick="closeEditModal()">Cancel</button>
+                <button class="btn-action" style="background: var(--blurple); color:white;" onclick="saveLinkEdit()"><span class="material-symbols-rounded">save</span> Save</button>
+                <button class="btn-action btn-delete" onclick="closeModal('editLinkModal')">Cancel</button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="qrModal">
+    <div class="modal-overlay" id="qrLinkModal">
         <div class="modal-content liquid-glass">
-            <h3>QR Configuration</h3>
-            <canvas id="qrCodeCanvas"></canvas>
+            <h3><span class="material-symbols-rounded">qr_code_scanner</span> QR Configuration</h3>
+            <canvas id="qrCodeCanvasLink"></canvas>
             <div class="qr-controls">
-                <label>Size (px):</label>
-                <input type="number" id="qrSize" value="200" min="100" max="1000" onchange="updateQR()" style="padding-left: 1.2rem;">
-                <label>Color Filter:</label>
-                <input type="color" id="qrColor" value="#5539CC" onchange="updateQR()" style="padding-left: 1.2rem;">
+                <label style="color: var(--text-muted); font-weight: 800; font-size: 0.9rem;">Size (px):</label>
+                <input type="number" id="qrSizeLink" value="200" min="100" max="1000" onchange="updateQRSync()" style="padding-left: 1.2rem;">
+                <label style="color: var(--text-muted); font-weight: 800; font-size: 0.9rem;">Color Filter:</label>
+                <input type="color" id="qrColorLink" value="#5539CC" onchange="updateQRSync()" style="padding-left: 1.2rem; height: 50px;">
             </div>
             <div class="card-actions" style="justify-content: center; margin-top: 20px;">
-                <button class="btn-action" style="background: var(--blurple); border-color: var(--blurple-light); color:white;" onclick="downloadQR()">
-                    <lord-icon src="https://cdn.lordicon.com/xhdhjyqy.json" trigger="hover" colors="primary:#ffffff" style="width:18px;height:18px"></lord-icon>
-                    Download
-                </button>
-                <button class="btn-action btn-delete" onclick="closeQRModal()">Close</button>
+                <button class="btn-action" style="background: var(--blurple); color:white;" onclick="downloadQRLink()"><span class="material-symbols-rounded">download</span> Download</button>
+                <button class="btn-action btn-delete" onclick="closeModal('qrLinkModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="qrImageModal" onclick="if(event.target===this) closeModal('qrImageModal')">
+        <div class="modal-content liquid-glass">
+            <h3><span class="material-symbols-rounded">qr_code_scanner</span> Scan Image QR</h3>
+            <div id="qrcodeImage"></div>
+            <button class="btn-action" style="margin-top: 1rem; width: 100%; justify-content: center;" onclick="closeModal('qrImageModal')">Close</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="editorModal">
+        <div class="modal-content large liquid-glass">
+            <div class="editor-workspace">
+                <h3><span class="material-symbols-rounded">palette</span> Image Workspace</h3>
+                <div class="canvas-container" id="canvasContainer">
+                    <canvas id="editCanvas"></canvas>
+                    <div id="cropBox"></div>
+                </div>
+                <div class="control-row">
+                    <button class="btn-action" id="btnDrawCrop" style="background: var(--blurple); color:white;"><span class="material-symbols-rounded">crop</span> Start Crop</button>
+                    <button class="btn-action" id="btnApplyCrop" style="display:none; border-color: var(--success); color: var(--success);"><span class="material-symbols-rounded">check</span> Apply Crop</button>
+                </div>
+            </div>
+
+            <div class="editor-sidebar liquid-glass">
+                <h4 style="margin:0; font-weight: 800;">Dimensions</h4>
+                <label class="checkbox-label"><input type="checkbox" id="lockRatio" checked> Lock Ratio</label>
+                <div class="control-row">
+                    <div class="control-group" style="flex: 1;"><label>Width</label><input type="number" id="editW"></div>
+                    <div class="control-group" style="width: 80px;"><label>Unit</label><select id="unitW"><option value="px">px</option><option value="%">%</option></select></div>
+                </div>
+                <div class="control-row">
+                    <div class="control-group" style="flex: 1;"><label>Height</label><input type="number" id="editH"></div>
+                    <div class="control-group" style="width: 80px;"><label>Unit</label><select id="unitH"><option value="px">px</option><option value="%">%</option></select></div>
+                </div>
+                <div class="control-row">
+                    <div class="control-group" style="flex: 1;"><label>Rotate</label><select id="editRotate"><option value="0">0°</option><option value="90">90°</option><option value="180">180°</option><option value="270">270°</option></select></div>
+                    <div class="control-group" style="flex: 1;"><label>Flip</label><select id="editFlip"><option value="none">None</option><option value="h">Horizontal</option><option value="v">Vertical</option></select></div>
+                </div>
+
+                <h4 style="margin:10px 0 0 0; font-weight: 800;">Adjustments</h4>
+                <div class="control-group"><label>Zoom (<span id="zoomVal">1x</span>)</label><input type="range" id="editZoom" min="0.1" max="3" step="0.1" value="1"></div>
+                <div class="control-group">
+                    <label>Filter</label>
+                    <select id="editFilter">
+                        <option value="none">None</option><option value="grayscale(100%)">Grayscale</option>
+                        <option value="sepia(100%)">Sepia</option><option value="invert(100%)">Invert</option>
+                        <option value="blur(4px)">Blur</option><option value="brightness(150%)">Brighten</option>
+                    </select>
+                </div>
+                <div style="flex: 1;"></div>
+                <div class="control-group"><label>Format</label><select id="editFormat"><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option></select></div>
+
+                <div class="control-row" style="margin-top: 1rem; justify-content: space-between;">
+                    <button class="btn-action btn-delete" onclick="closeModal('editorModal')">Cancel</button>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn-action" onclick="downloadEditedImage()"><span class="material-symbols-rounded">download</span> PC</button>
+                        <button class="btn-action" style="background: var(--blurple); color:white;" onclick="saveImageEdits()"><span class="material-symbols-rounded">cloud_upload</span> Update</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- Core Setup & State ---
-        const STORAGE_KEY = "acelink_history";
-        let linkHistory = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        let currentQRUrl = "";
-        let qrInstance = null;
-        let editingLinkId = null;
-        
-        // --- Theme Logic (Dark/Light Mode) ---
-        let isLightMode = localStorage.getItem('acelink_theme') === 'light';
+        // ================= GLOBAL SETUP =================
+        let isLightMode = localStorage.getItem('ace_workspace_theme') === 'light';
         if (isLightMode) document.body.classList.add('light-mode');
 
         function updateLordiconColors() {
@@ -460,90 +404,172 @@
             icons.forEach(icon => icon.setAttribute('colors', colorStr));
             
             const themeIcon = document.getElementById('themeIcon');
-            if (themeIcon) {
-                themeIcon.setAttribute('src', isLightMode ? "https://cdn.lordicon.com/qwwuyobg.json" : "https://cdn.lordicon.com/whtfuqlw.json");
-            }
+            if (themeIcon) { themeIcon.textContent = isLightMode ? "dark_mode" : "light_mode"; }
+        }
+
+        function initParticles() {
+            particlesJS("particles-js", {
+                particles: { number: { value: 50, density: { enable: true, value_area: 800 } }, color: { value: isLightMode ? "#5539CC" : "#0DF8FF" }, shape: { type: "circle" }, opacity: { value: 0.4, random: true }, size: { value: 3, random: true }, line_linked: { enable: true, distance: 150, color: isLightMode ? "#5539CC" : "#5539CC", opacity: 0.2, width: 1 }, move: { enable: true, speed: 1.5, direction: "none", random: true, out_mode: "out" } },
+                interactivity: { detect_on: "canvas", events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true }, modes: { grab: { distance: 140, line_linked: { opacity: 0.6 } }, push: { particles_nb: 3 } } }, retina_detect: true
+            });
         }
 
         function toggleTheme() {
             isLightMode = !isLightMode;
-            if(isLightMode) {
-                document.body.classList.add('light-mode');
-                localStorage.setItem('acelink_theme', 'light');
-            } else {
-                document.body.classList.remove('light-mode');
-                localStorage.setItem('acelink_theme', 'dark');
-            }
-            updateLordiconColors();
+            if(isLightMode) { document.body.classList.add('light-mode'); localStorage.setItem('ace_workspace_theme', 'light'); } 
+            else { document.body.classList.remove('light-mode'); localStorage.setItem('ace_workspace_theme', 'dark'); }
+            updateLordiconColors(); initParticles();
         }
-        
-        updateLordiconColors();
 
-        // --- Data Management ---
-        function saveHistory() { localStorage.setItem(STORAGE_KEY, JSON.stringify(linkHistory)); }
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`content-${tabName}`).classList.add('active');
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div"); toast.className = "toast";
+            let iconName = "check_circle"; let iconColor = "var(--success)";
+            if(type === "error") { iconName = "error"; iconColor = "var(--danger)"; }
+            if(type === "trash") { iconName = "delete"; iconColor = "var(--danger)"; }
+            toast.innerHTML = `<span class="material-symbols-rounded" style="color:${iconColor}">${iconName}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.add("fade-out"); toast.addEventListener("animationend", () => toast.remove()); }, 3000);
+        }
+
+        function copyToClipboard(textOrId, isId = false) {
+            let textToCopy = textOrId; let elem = null;
+            if (isId) {
+                elem = document.getElementById(textOrId); textToCopy = elem.value;
+                if(textOrId.startsWith('md-')) elem.type = 'text'; 
+                elem.select(); elem.setSelectionRange(0, 99999);
+            }
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast("Copied to clipboard!", "success");
+                if (isId && textOrId.startsWith('md-')) elem.type = 'hidden';
+            });
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id); modal.classList.remove('show');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+            if(id === 'editLinkModal') editingLinkId = null;
+            if(id === 'editorModal') currentEditingItem = null;
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id); modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        window.onload = () => { updateLordiconColors(); initParticles(); renderLinkHistory(); renderImageHistory(); };
+
+        // ================= URL SHORTENER LOGIC =================
+        const LINK_STORAGE = "acelink_history";
+        let linkHistory = JSON.parse(localStorage.getItem(LINK_STORAGE)) || [];
+        let currentQRUrlLink = ""; let qrInstanceLink = null; let editingLinkId = null;
+
+        function saveLinkHistory() { localStorage.setItem(LINK_STORAGE, JSON.stringify(linkHistory)); }
+
+        // Live Social Preview Fetcher (OG Tags)
+        let previewDebounce;
+        document.getElementById('longUrl').addEventListener('input', (e) => {
+            clearTimeout(previewDebounce);
+            const url = e.target.value.trim();
+            const previewBox = document.getElementById('livePreviewContainer');
+            
+            if (!url || !/^https?:\/\//i.test(url)) { previewBox.style.display = 'none'; return; }
+            
+            previewDebounce = setTimeout(async () => {
+                previewBox.style.display = 'flex';
+                previewBox.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite; color: var(--blurple-light);">sync</span> <span style="font-size: 0.9rem; color: var(--text-muted);">Fetching live preview...</span>';
+                try {
+                    const res = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+                    const data = await res.json();
+                    if(data.status === 'success' && data.data) {
+                        const { title, description, image } = data.data;
+                        previewBox.innerHTML = `
+                            ${image?.url ? `<img src="${image.url}" class="preview-img">` : '<div class="preview-img" style="display:flex;align-items:center;justify-content:center;"><span class="material-symbols-rounded" style="color:#555;">link</span></div>'}
+                            <div class="preview-text">
+                                <strong>${title || 'No Title Found'}</strong>
+                                <p>${description || 'No description available.'}</p>
+                            </div>
+                        `;
+                    } else { previewBox.style.display = 'none'; }
+                } catch (err) { previewBox.style.display = 'none'; }
+            }, 800);
+        });
 
         async function shortenLink() {
             const urlInput = document.getElementById('longUrl');
             const mdInput = document.getElementById('mdNote');
             const expireVal = document.getElementById('expireSelect').value;
+            const aliasInput = document.getElementById('customAlias').value.trim();
 
             let originalUrl = urlInput.value.trim();
             if (!originalUrl) return showToast("Please enter a valid URL.", "error");
-            if (!/^https?:\/\//i.test(originalUrl)) originalUrl = 'https://' + originalUrl;
+            if (!/^https?:\/\//i.test(originalUrl)) { originalUrl = 'https://' + originalUrl; }
 
             let expiresAt = null;
-            if (expireVal === '24h') expiresAt = new Date(Date.now() + 24*60*60*1000).toISOString();
-            if (expireVal === '7d') expiresAt = new Date(Date.now() + 7*24*60*60*1000).toISOString();
-            if (expireVal === '30d') expiresAt = new Date(Date.now() + 30*24*60*60*1000).toISOString();
+            if (expireVal !== 'never') {
+                const date = new Date();
+                if (expireVal === '24h') date.setHours(date.getHours() + 24);
+                if (expireVal === '7d') date.setDate(date.getDate() + 7);
+                if (expireVal === '30d') date.setDate(date.getDate() + 30);
+                expiresAt = date.toISOString();
+            }
 
-            let shortUrl = `https://ace.ln/${Math.random().toString(36).substring(2, 8)}`;
-            let uniqueId = Date.now().toString();
+            try {
+                const res = await fetch('/api/shorten', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: originalUrl, note: mdInput.value.trim(), expiresAt: expiresAt, alias: aliasInput })
+                });
 
-            linkHistory.unshift({
-                id: uniqueId,
-                originalUrl,
-                shortUrl,
-                markdownRaw: mdInput.value.trim() || "*No description provided.*",
-                createdAt: new Date().toISOString(),
-                expiresAt: expiresAt
-            });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
 
-            saveHistory();
-            renderHistory();
-            urlInput.value = ""; mdInput.value = "";
-            showToast("Link shortened successfully!", "success");
+                const shortUrl = data.shortUrl;
+                const rawMarkdown = mdInput.value.trim() || "*No description provided.*";
+                const safeHtml = DOMPurify.sanitize(marked.parse(rawMarkdown));
+
+                linkHistory.unshift({
+                    id: 'lnk_' + Date.now(),
+                    originalUrl, shortUrl,
+                    markdownRaw: rawMarkdown, htmlSafe: safeHtml,
+                    createdAt: new Date().toISOString(),
+                    expiresAt: expiresAt,
+                    pinned: false // New Pin property
+                });
+
+                saveLinkHistory(); renderLinkHistory();
+                showToast("Link shortened successfully!");
+                document.getElementById('customAlias').value = '';
+                document.getElementById('livePreviewContainer').style.display = 'none';
+            } catch (err) { showToast(err.message || "Failed to shorten link.", "error"); }
+        }
+
+        window.togglePin = (id) => {
+            const link = linkHistory.find(l => l.id === id);
+            if(link) { link.pinned = !link.pinned; saveLinkHistory(); renderLinkHistory(); }
         }
 
         function deleteLink(id) {
             linkHistory = linkHistory.filter(link => link.id !== id);
-            saveHistory(); renderHistory(); showToast("Link removed permanently.", "trash");
+            saveLinkHistory(); renderLinkHistory(); showToast("Link removed permanently.", "trash");
         }
 
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => showToast("Link copied to clipboard!", "success"));
-        }
-
-        // --- Edit Logic ---
-        function openEditModal(id) {
-            const link = linkHistory.find(l => l.id === id);
-            if(!link) return;
+        function openEditLinkModal(id) {
+            const link = linkHistory.find(l => l.id === id); if(!link) return;
             editingLinkId = id;
             document.getElementById('editOriginalUrl').value = link.originalUrl;
             document.getElementById('editMdNote').value = link.markdownRaw;
-            
-            const modal = document.getElementById('editModal');
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
+            openModal('editLinkModal');
         }
 
-        function closeEditModal() {
-            const modal = document.getElementById('editModal');
-            modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 300);
-            editingLinkId = null;
-        }
-
-        function saveEdit() {
+        function saveLinkEdit() {
             if(!editingLinkId) return;
             const link = linkHistory.find(l => l.id === editingLinkId);
             if(link) {
@@ -553,116 +579,76 @@
                 
                 link.originalUrl = newUrl;
                 link.markdownRaw = document.getElementById('editMdNote').value.trim() || "*No description provided.*";
-                
-                saveHistory();
-                renderHistory();
-                showToast("Link updated successfully!", "success");
-                closeEditModal();
+                saveLinkHistory(); renderLinkHistory(); showToast("Link updated successfully!", "success");
+                closeModal('editLinkModal');
             }
         }
 
-        // --- UI Feedback (Toasts) ---
-        function showToast(message, type = "success") {
-            const container = document.getElementById("toast-container");
-            const toast = document.createElement("div");
-            toast.className = "toast";
-            let iconSrc = "https://cdn.lordicon.com/egiwmiit.json"; 
-            if(type === "error") iconSrc = "https://cdn.lordicon.com/bmnlikjh.json"; 
-            if(type === "trash") iconSrc = "https://cdn.lordicon.com/gsqxdxog.json"; 
-
-            toast.innerHTML = `<lord-icon src="${iconSrc}" trigger="in" colors="primary:#7A5FFF,secondary:#ffffff" style="width:24px;height:24px;min-width:24px;"></lord-icon> <span>${message}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => { toast.classList.add("fade-out"); toast.addEventListener("animationend", () => toast.remove()); }, 3000);
+        function openQRLinkModal(url) { currentQRUrlLink = url; openModal('qrLinkModal'); updateQRSync(); }
+        function updateQRSync() {
+            const size = parseInt(document.getElementById('qrSizeLink').value) || 200; const color = document.getElementById('qrColorLink').value || '#5539CC';
+            if (!qrInstanceLink) qrInstanceLink = new QRious({ element: document.getElementById('qrCodeCanvasLink'), value: currentQRUrlLink, size: size, foreground: color, level: 'H' });
+            else qrInstanceLink.set({ value: currentQRUrlLink, size: size, foreground: color });
         }
 
-        // --- QR Code Modals ---
-        function openQRModal(url) {
-            currentQRUrl = url; const modal = document.getElementById('qrModal');
-            modal.style.display = 'flex'; setTimeout(() => modal.classList.add('show'), 10); updateQR();
-        }
-        function closeQRModal() {
-            const modal = document.getElementById('qrModal');
-            modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300);
-        }
-        function updateQR() {
-            const size = parseInt(document.getElementById('qrSize').value) || 200;
-            const color = document.getElementById('qrColor').value || '#5539CC';
-            if (!qrInstance) qrInstance = new QRious({ element: document.getElementById('qrCodeCanvas'), value: currentQRUrl, size: size, foreground: color, level: 'H' });
-            else qrInstance.set({ value: currentQRUrl, size: size, foreground: color });
-        }
-        function downloadQR() {
+        function downloadQRLink() {
             const link = document.createElement('a'); link.download = 'AceLink-QR.png';
-            link.href = document.getElementById('qrCodeCanvas').toDataURL('image/png'); link.click();
-            showToast("QR Code downloaded!", "success"); closeQRModal();
+            link.href = document.getElementById('qrCodeCanvasLink').toDataURL('image/png'); link.click();
+            showToast("QR Code downloaded!", "success"); closeModal('qrLinkModal');
         }
 
-        // --- Rendering & Filtering ---
-        function renderHistory() {
-            const container = document.getElementById("historyList");
+        function renderLinkHistory() {
+            const container = document.getElementById("linkHistoryList");
             const searchQuery = document.getElementById("searchInput").value.toLowerCase();
             container.innerHTML = "";
 
-            const filteredLinks = linkHistory.filter(link => {
+            let filteredLinks = linkHistory.filter(link => {
                 return link.originalUrl.toLowerCase().includes(searchQuery) || 
                        link.shortUrl.toLowerCase().includes(searchQuery) || 
                        link.markdownRaw.toLowerCase().includes(searchQuery);
             });
 
+            // Sorting logic: Pinned first, then by date descending
+            filteredLinks.sort((a, b) => {
+                if (a.pinned === b.pinned) return new Date(b.createdAt) - new Date(a.createdAt);
+                return a.pinned ? -1 : 1;
+            });
+
             if (filteredLinks.length === 0) {
-                container.innerHTML = `
-                <div class="empty-state liquid-glass">
-                    <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" delay="2000" class="themed-icon" style="width:60px;height:60px;margin-bottom:15px;"></lord-icon>
-                    <br>No links found.
-                </div>`;
-                updateLordiconColors();
-                return;
+                container.innerHTML = `<div class="empty-state liquid-glass"><lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" delay="2000" class="themed-icon" style="width:60px;height:60px;margin-bottom:15px;"></lord-icon><br>No links found.</div>`;
+                updateLordiconColors(); return;
             }
 
             filteredLinks.forEach(link => {
                 const card = document.createElement("div");
-                card.className = "history-card liquid-glass";
+                card.className = `history-card liquid-glass ${link.pinned ? 'is-pinned' : ''}`;
                 
                 let badgeHTML = '';
                 if (link.expiresAt) {
                     const isExpired = new Date() > new Date(link.expiresAt);
                     badgeHTML = isExpired ? `<span class="badge expired" title="Expired on ${new Date(link.expiresAt).toLocaleDateString()}">Expired</span>` 
                                           : `<span class="badge active" title="Expires on ${new Date(link.expiresAt).toLocaleDateString()}">Active</span>`;
-                } else {
-                    badgeHTML = `<span class="badge active">Permanent</span>`;
-                }
+                } else { badgeHTML = `<span class="badge active">Permanent</span>`; }
 
-                // Generates an actual screenshot of the destination website using thum.io
                 const thumbnailUrl = `https://image.thum.io/get/width/600/crop/800/${link.originalUrl}`;
+                const safeMarkdownHTML = DOMPurify.sanitize(marked.parse(link.markdownRaw));
 
                 card.innerHTML = `
                     <div class="link-thumbnail">
                         ${badgeHTML}
-                        <img src="${thumbnailUrl}" alt="Thumbnail preview of ${link.originalUrl}" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'rgba(255,255,255,0.05)\\'/></svg>'">
+                        <img src="${thumbnailUrl}" alt="Thumbnail preview" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'rgba(255,255,255,0.05)\\'/></svg>'">
                     </div>
-                    
                     <div class="history-content">
                         <a href="${link.originalUrl}" target="_blank" rel="noopener noreferrer" class="short-url">${link.shortUrl}</a>
                         <div class="original-url">${link.originalUrl}</div>
-                        
                         <div class="card-actions">
-                            <button class="btn-action" onclick="copyToClipboard('${link.shortUrl}')">
-                                <lord-icon src="https://cdn.lordicon.com/nocovwne.json" trigger="hover" class="themed-icon" style="width:18px;height:18px"></lord-icon>
-                                Copy
-                            </button>
-                            <button class="btn-action" onclick="openEditModal('${link.id}')">
-                                <lord-icon src="https://cdn.lordicon.com/puvaffet.json" trigger="hover" class="themed-icon" style="width:18px;height:18px"></lord-icon>
-                                Edit
-                            </button>
-                            <button class="btn-action" onclick="openQRModal('${link.shortUrl}')">
-                                <lord-icon src="https://cdn.lordicon.com/whtfuqlw.json" trigger="hover" class="themed-icon" style="width:18px;height:18px"></lord-icon>
-                                QR Code
-                            </button>
-                            <button class="btn-action btn-delete" onclick="deleteLink('${link.id}')">
-                                <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="hover" class="themed-icon" style="width:18px;height:18px"></lord-icon>
-                                Delete
-                            </button>
+                            <button class="btn-action" onclick="copyToClipboard('${link.shortUrl}')"><span class="material-symbols-rounded">content_copy</span> Copy</button>
+                            <button class="btn-action" onclick="openEditLinkModal('${link.id}')"><span class="material-symbols-rounded">edit</span> Edit</button>
+                            <button class="btn-action" onclick="openQRLinkModal('${link.shortUrl}')"><span class="material-symbols-rounded">qr_code_2</span> QR Code</button>
+                            <button class="btn-action" onclick="togglePin('${link.id}')" title="${link.pinned ? 'Unpin' : 'Pin to top'}"><span class="material-symbols-rounded" style="color: ${link.pinned ? 'var(--blurple-light)' : 'inherit'}">${link.pinned ? 'star' : 'star_border'}</span> ${link.pinned ? 'Pinned' : 'Pin'}</button>
+                            <button class="btn-action btn-delete" onclick="deleteLink('${link.id}')"><span class="material-symbols-rounded">delete</span> Delete</button>
                         </div>
-                        <div class="markdown-content">${marked.parse(link.markdownRaw)}</div>
+                        <div class="markdown-content">${safeMarkdownHTML}</div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -670,7 +656,241 @@
             updateLordiconColors(); 
         }
 
-        renderHistory();
+        // ================= IMAGE HOST & EDITOR LOGIC =================
+        const IMG_STORAGE = 'imagelink_history_v8'; const CLOUD_NAME = 'dvzzebkww'; const UPLOAD_PRESET = 'linkshare_unsigned';
+        let imageUploadHistory = JSON.parse(localStorage.getItem(IMG_STORAGE)) || [];
+        const dropzone = document.getElementById('dropzone'); const fileInput = document.getElementById('fileInput'); const imageQueueContainer = document.getElementById('imageQueueContainer');
+
+        let currentEditingItem = null; let originalImageObj = new Image(); let currentImageObj = new Image(); 
+        let isDrawingCrop = false, cropModeActive = false; let cropStart = {x: 0, y: 0}, cropRect = {x: 0, y: 0, w: 0, h: 0};
+        const canvas = document.getElementById('editCanvas'); const ctx = canvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvasContainer'); const cropBox = document.getElementById('cropBox');
+        
+        dropzone.addEventListener('click', () => fileInput.click());
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, prev, false));
+        function prev(e) { e.preventDefault(); e.stopPropagation(); }
+        ['dragenter', 'dragover'].forEach(e => dropzone.addEventListener(e, () => dropzone.classList.add('dragover'), false));
+        ['dragleave', 'drop'].forEach(e => dropzone.addEventListener(e, () => dropzone.classList.remove('dragover'), false));
+        dropzone.addEventListener('drop', e => processImageFiles(e.dataTransfer.files), false);
+        fileInput.addEventListener('change', e => processImageFiles(e.target.files), false);
+
+        // Client-Side Image Compression Function
+        function compressImage(file, maxWidth = 1920, quality = 0.7) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = event => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const tempCanvas = document.createElement('canvas');
+                        let width = img.width; let height = img.height;
+                        if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                        tempCanvas.width = width; tempCanvas.height = height;
+                        const tCtx = tempCanvas.getContext('2d');
+                        tCtx.drawImage(img, 0, 0, width, height);
+                        const format = file.type === 'image/png' ? 'image/png' : 'image/webp';
+                        const compQuality = format === 'image/png' ? undefined : quality;
+                        resolve(tempCanvas.toDataURL(format, compQuality));
+                    }
+                }
+            });
+        }
+
+        async function processImageFiles(files) {
+            for (let file of [...files]) {
+                if(!file.type.startsWith('image/')) { showToast('Only images are allowed.', 'error'); continue; }
+                const compressedDataUrl = await compressImage(file);
+                createImageQueueItem(file.name, compressedDataUrl, true);
+            }
+            fileInput.value = '';
+        }
+
+        async function createImageQueueItem(name, b64Data, isNew = false, cloudUrl = null) {
+            const itemId = 'img-' + Math.random().toString(36).substr(2, 9);
+            const viewUrl = cloudUrl || b64Data; const safeName = name.replace(/"/g, '&quot;');
+            const itemHTML = `
+                <div class="queue-item liquid-glass" id="${itemId}">
+                    <img src="${b64Data}" class="item-preview" id="thumb-${itemId}">
+                    <div class="item-header">
+                        <input type="text" class="name-input" id="name-${itemId}" value="${safeName}" title="Click to rename" onchange="renameImageFile('${itemId}')">
+                        <span class="item-status" style="color: ${isNew ? 'var(--solid-cyan)' : 'var(--success)'}; font-size: 0.75rem; font-weight:800;">${isNew ? 'UPLOADING...' : 'ONLINE'}</span>
+                    </div>
+                    ${isNew ? `<div class="progress-track" id="track-${itemId}"><div class="progress-fill" id="fill-${itemId}"></div></div>` : ''}
+                    <div class="links-container ${isNew ? '' : 'active'}" id="links-${itemId}">
+                        <div class="link-group">
+                            <input type="text" id="direct-${itemId}" value="${viewUrl}" readonly>
+                            <button class="btn-action" onclick="copyToClipboard('direct-${itemId}', true)"><span class="material-symbols-rounded">content_copy</span></button>
+                        </div>
+                        <input type="hidden" id="md-${itemId}" value="![${safeName}](${viewUrl})">
+                        <div class="action-bar">
+                            <button class="btn-action" onclick="copyToClipboard('md-${itemId}', true)"><span class="material-symbols-rounded">data_object</span> MD</button>
+                            <button class="btn-action" onclick="openImageEditor('${itemId}')"><span class="material-symbols-rounded">palette</span> EDIT</button>
+                            <button class="btn-action" onclick="showImageQR('${itemId}')"><span class="material-symbols-rounded">qr_code_2</span> QR</button>
+                            <button class="btn-action" onclick="shareImageLink('${itemId}')"><span class="material-symbols-rounded">share</span> SHARE</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            isNew ? imageQueueContainer.insertAdjacentHTML('afterbegin', itemHTML) : imageQueueContainer.insertAdjacentHTML('beforeend', itemHTML);
+            document.getElementById(itemId).dataset.filename = name; document.getElementById(itemId).dataset.b64 = b64Data;
+            if(cloudUrl) document.getElementById(itemId).dataset.cloud = cloudUrl;
+            if(isNew) handleImageUpload(itemId, name, b64Data);
+        }
+
+        window.renameImageFile = (itemId) => {
+            const newName = document.getElementById(`name-${itemId}`).value; const item = document.getElementById(itemId);
+            item.dataset.filename = newName; const url = document.getElementById(`direct-${itemId}`).value;
+            document.getElementById(`md-${itemId}`).value = `![${newName}](${url})`;
+            const histIndex = imageUploadHistory.findIndex(h => h.cloudUrl === item.dataset.cloud || h.b64Data === item.dataset.b64);
+            if(histIndex > -1) { imageUploadHistory[histIndex].name = newName; localStorage.setItem(IMG_STORAGE, JSON.stringify(imageUploadHistory)); }
+            showToast("Renamed successfully.");
+        };
+
+        async function handleImageUpload(itemId, name, b64Data) {
+            const track = document.getElementById(`track-${itemId}`); const fill = document.getElementById(`fill-${itemId}`);
+            const status = document.querySelector(`#${itemId} .item-status`);
+            fill.style.width = '50%'; let finalUrl = null;
+
+            try {
+                const blob = await (await fetch(b64Data)).blob();
+                const formData = new FormData(); formData.append('file', blob); formData.append('upload_preset', UPLOAD_PRESET);
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!res.ok || !data.secure_url) throw new Error(data.error?.message || 'Upload failed');
+                
+                finalUrl = data.secure_url; fill.style.width = '80%';
+                status.textContent = 'SHORTENING...'; status.style.color = 'var(--blurple-light)';
+
+                try {
+                    const shortRes = await fetch('/api/shorten', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: finalUrl, note: `Image Upload: ${name}` }) });
+                    const shortData = await shortRes.json();
+                    if (shortRes.ok && shortData.shortUrl) {
+                        finalUrl = shortData.shortUrl;
+                        linkHistory.unshift({ id: 'lnk_' + Date.now(), originalUrl: data.secure_url, shortUrl: finalUrl, markdownRaw: `Image Upload: ${name}`, htmlSafe: DOMPurify.sanitize(marked.parse(`Image Upload: ${name}`)), createdAt: new Date().toISOString(), expiresAt: null, pinned: false });
+                        saveLinkHistory(); renderLinkHistory();
+                    }
+                } catch(shortErr) { console.warn("Auto-shorten API failed, falling back to direct Cloudinary URL.", shortErr); }
+
+                status.textContent = 'ONLINE'; status.style.color = 'var(--success)';
+                document.getElementById(`direct-${itemId}`).value = finalUrl;
+                document.getElementById(`md-${itemId}`).value = `![${name}](${finalUrl})`;
+                document.getElementById(itemId).dataset.cloud = finalUrl;
+            } catch(err) {
+                console.error(err); status.textContent = 'LOCAL ONLY'; status.style.color = 'var(--danger)'; showToast("Cloud upload failed. Saved locally.", "error");
+            }
+            fill.style.width = '100%';
+            setTimeout(() => { track.style.display = 'none'; document.getElementById(`links-${itemId}`).classList.add('active'); if(finalUrl) saveToImageHistory(name, b64Data, finalUrl); }, 400);
+        }
+
+        window.shareImageLink = (itemId) => {
+            const url = document.getElementById(`direct-${itemId}`).value; const name = document.getElementById(itemId).dataset.filename;
+            if (navigator.share) { navigator.share({ title: name, text: 'Check out this image on Ace Workspace', url: url }).catch(console.error); } 
+            else { copyToClipboard(`direct-${itemId}`, true); showToast('Link copied! Web Share not supported on this device.'); }
+        };
+
+        let qrImageObj = null;
+        window.showImageQR = (itemId) => {
+            const url = document.getElementById(`direct-${itemId}`).value; document.getElementById('qrcodeImage').innerHTML = ''; 
+            qrImageObj = new QRCode(document.getElementById("qrcodeImage"), { text: url, width: 200, height: 200, colorDark : "#5539CC", colorLight : "#ffffff" });
+            openModal('qrImageModal');
+        };
+
+        function saveToImageHistory(name, b64Data, cloudUrl = null) { imageUploadHistory.unshift({ name, b64Data, cloudUrl, date: new Date().toISOString() }); if(imageUploadHistory.length > 12) imageUploadHistory.pop(); localStorage.setItem(IMG_STORAGE, JSON.stringify(imageUploadHistory)); }
+        function renderImageHistory() { imageQueueContainer.innerHTML = ''; imageUploadHistory.forEach(i => createImageQueueItem(i.name, i.b64Data, false, i.cloudUrl)); }
+        window.clearImageHistory = () => { if(confirm('Clear all uploaded images from history?')) { localStorage.removeItem(IMG_STORAGE); imageUploadHistory = []; imageQueueContainer.innerHTML = ''; } }
+
+        // --- Image Editor Local Scope ---
+        const inW = document.getElementById('editW'); const inH = document.getElementById('editH'); const unW = document.getElementById('unitW'); const unH = document.getElementById('unitH'); const lockRatio = document.getElementById('lockRatio'); let originalRatio = 1;
+        window.openImageEditor = (itemId) => {
+            const item = document.getElementById(itemId); currentEditingItem = itemId;
+            document.getElementById('editZoom').value = 1; document.getElementById('zoomVal').innerText = '1x'; document.getElementById('editFilter').value = 'none'; document.getElementById('editRotate').value = '0'; document.getElementById('editFlip').value = 'none'; resetEditorCrop();
+            originalImageObj.onload = () => { currentImageObj.src = originalImageObj.src; originalRatio = originalImageObj.width / originalImageObj.height; inW.value = originalImageObj.width; unW.value = 'px'; inH.value = originalImageObj.height; unH.value = 'px'; drawEditorCanvas(); openModal('editorModal'); };
+            originalImageObj.src = item.dataset.b64;
+        }
+
+        function calcDim(val, unit, isWidth) { if(unit === 'px') return parseFloat(val); const base = isWidth ? originalImageObj.width : originalImageObj.height; return base * (parseFloat(val) / 100); }
+        function syncDimensions(source) {
+            const wVal = parseFloat(inW.value) || 0; const hVal = parseFloat(inH.value) || 0;
+            if(lockRatio.checked) {
+                if(source === 'w') { const actualW = calcDim(wVal, unW.value, true); const newH = actualW / originalRatio; inH.value = unH.value === 'px' ? Math.round(newH) : Math.round((newH / originalImageObj.height) * 100); } 
+                else { const actualH = calcDim(hVal, unH.value, false); const newW = actualH * originalRatio; inW.value = unW.value === 'px' ? Math.round(newW) : Math.round((newW / originalImageObj.width) * 100); }
+            } drawEditorCanvas();
+        }
+        inW.addEventListener('input', () => syncDimensions('w')); inH.addEventListener('input', () => syncDimensions('h')); unW.addEventListener('change', () => syncDimensions('w')); unH.addEventListener('change', () => syncDimensions('h'));
+        document.getElementById('editZoom').addEventListener('input', (e) => { document.getElementById('zoomVal').innerText = e.target.value + 'x'; drawEditorCanvas(); });
+        document.getElementById('editFilter').addEventListener('change', drawEditorCanvas); document.getElementById('editRotate').addEventListener('change', drawEditorCanvas); document.getElementById('editFlip').addEventListener('change', drawEditorCanvas);
+
+        function drawEditorCanvas() {
+            let w = calcDim(inW.value, unW.value, true); let h = calcDim(inH.value, unH.value, false);
+            const zoom = parseFloat(document.getElementById('editZoom').value); const rot = parseInt(document.getElementById('editRotate').value); const flip = document.getElementById('editFlip').value;
+            if (rot === 90 || rot === 270) { canvas.width = h * zoom; canvas.height = w * zoom; } else { canvas.width = w * zoom; canvas.height = h * zoom; }
+            ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.save(); ctx.translate(canvas.width / 2, canvas.height / 2); ctx.rotate(rot * Math.PI / 180);
+            let scaleX = 1, scaleY = 1; if(flip === 'h') scaleX = -1; if(flip === 'v') scaleY = -1; ctx.scale(scaleX, scaleY);
+            ctx.filter = document.getElementById('editFilter').value; ctx.drawImage(currentImageObj, -(w * zoom)/2, -(h * zoom)/2, w * zoom, h * zoom); ctx.restore();
+        }
+
+        const btnDrawCrop = document.getElementById('btnDrawCrop'); const btnApplyCrop = document.getElementById('btnApplyCrop');
+        btnDrawCrop.addEventListener('click', () => {
+            cropModeActive = !cropModeActive;
+            if(cropModeActive) { btnDrawCrop.innerHTML = `<span class="material-symbols-rounded">close</span> Cancel Crop`; btnDrawCrop.style.background = 'var(--danger)'; btnApplyCrop.style.display = 'block'; canvasContainer.style.cursor = 'crosshair'; } 
+            else { resetEditorCrop(); }
+        });
+
+        canvasContainer.addEventListener('mousedown', (e) => {
+            if(!cropModeActive) return;
+            const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
+            cropStart.x = (e.clientX - rect.left) * scaleX; cropStart.y = (e.clientY - rect.top) * scaleY; isDrawingCrop = true; cropBox.style.display = 'block';
+            cropBox.style.left = (e.clientX - rect.left) + 'px'; cropBox.style.top = (e.clientY - rect.top) + 'px'; cropBox.style.width = '0px'; cropBox.style.height = '0px';
+        });
+
+        canvasContainer.addEventListener('mousemove', (e) => {
+            if(!isDrawingCrop || !cropModeActive) return;
+            const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
+            const currentX = (e.clientX - rect.left) * scaleX; const currentY = (e.clientY - rect.top) * scaleY;
+            cropRect.x = Math.min(cropStart.x, currentX); cropRect.y = Math.min(cropStart.y, currentY); cropRect.w = Math.abs(currentX - cropStart.x); cropRect.h = Math.abs(currentY - cropStart.y);
+            const boxX = Math.min((e.clientX - rect.left), cropStart.x / scaleX); const boxY = Math.min((e.clientY - rect.top), cropStart.y / scaleY);
+            cropBox.style.left = boxX + 'px'; cropBox.style.top = boxY + 'px'; cropBox.style.width = (cropRect.w / scaleX) + 'px'; cropBox.style.height = (cropRect.h / scaleY) + 'px';
+        });
+
+        window.addEventListener('mouseup', () => { isDrawingCrop = false; });
+
+        btnApplyCrop.addEventListener('click', () => {
+            if(cropRect.w === 0 || cropRect.h === 0) return showToast('Select an area first.', 'error');
+            const tempCanvas = document.createElement('canvas'); tempCanvas.width = cropRect.w; tempCanvas.height = cropRect.h;
+            tempCanvas.getContext('2d').drawImage(canvas, cropRect.x, cropRect.y, cropRect.w, cropRect.h, 0, 0, cropRect.w, cropRect.h);
+            currentImageObj.onload = () => { originalRatio = currentImageObj.width / currentImageObj.height; inW.value = currentImageObj.width; unW.value = 'px'; inH.value = currentImageObj.height; unH.value = 'px'; document.getElementById('editZoom').value = 1; document.getElementById('zoomVal').innerText = '1x'; document.getElementById('editRotate').value = '0'; document.getElementById('editFlip').value = 'none'; resetEditorCrop(); drawEditorCanvas(); };
+            currentImageObj.src = tempCanvas.toDataURL();
+        });
+
+        function resetEditorCrop() { cropModeActive = false; isDrawingCrop = false; cropBox.style.display = 'none'; cropRect = {x:0,y:0,w:0,h:0}; btnDrawCrop.innerHTML = `<span class="material-symbols-rounded">crop</span> Start Crop`; btnDrawCrop.style.background = 'var(--blurple)'; btnApplyCrop.style.display = 'none'; canvasContainer.style.cursor = 'default'; }
+
+        window.downloadEditedImage = () => { const format = document.getElementById('editFormat').value; const a = document.createElement('a'); a.href = canvas.toDataURL(format); a.download = `AceEdit_${document.getElementById(currentEditingItem).dataset.filename.split('.')[0]}.${format.split('/')[1]}`; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+
+        window.saveImageEdits = async () => {
+            const b64Data = canvas.toDataURL(document.getElementById('editFormat').value); const item = document.getElementById(currentEditingItem); const name = item.dataset.filename;
+            let finalUrl = b64Data; const statusNode = document.querySelector(`#${currentEditingItem} .item-status`);
+            statusNode.textContent = 'UPDATING...'; statusNode.style.color = 'var(--solid-cyan)';
+
+            try {
+                const blob = await (await fetch(b64Data)).blob(); const formData = new FormData(); formData.append('file', blob); formData.append('upload_preset', UPLOAD_PRESET);
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData }); const data = await res.json();
+                if(data.secure_url) {
+                    finalUrl = data.secure_url;
+                    try {
+                        const shortRes = await fetch('/api/shorten', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: finalUrl, note: `Edited Image: ${name}` }) });
+                        const shortData = await shortRes.json();
+                        if(shortRes.ok && shortData.shortUrl) { finalUrl = shortData.shortUrl; linkHistory.unshift({ id: 'lnk_' + Date.now(), originalUrl: data.secure_url, shortUrl: finalUrl, markdownRaw: `Edited Image: ${name}`, htmlSafe: DOMPurify.sanitize(marked.parse(`Edited Image: ${name}`)), createdAt: new Date().toISOString(), expiresAt: null, pinned: false }); saveLinkHistory(); renderLinkHistory(); }
+                    } catch(e) {} 
+                    item.dataset.cloud = finalUrl; statusNode.textContent = 'UPDATED'; statusNode.style.color = 'var(--success)';
+                } else throw new Error();
+            } catch(e) { console.error(e); statusNode.textContent = 'LOCAL ONLY'; statusNode.style.color = 'var(--danger)'; showToast("Cloud update failed.", "error");}
+
+            item.dataset.b64 = b64Data; document.getElementById(`direct-${currentEditingItem}`).value = finalUrl; document.getElementById(`md-${currentEditingItem}`).value = `![${name}](${finalUrl})`; document.getElementById(`thumb-${currentEditingItem}`).src = b64Data;
+            const histIndex = imageUploadHistory.findIndex(h => h.name === name);
+            if(histIndex > -1) { imageUploadHistory[histIndex].b64Data = b64Data; imageUploadHistory[histIndex].cloudUrl = item.dataset.cloud || null; localStorage.setItem(IMG_STORAGE, JSON.stringify(imageUploadHistory)); }
+            showToast("Image updated successfully!"); closeModal('editorModal');
+        }
     </script>
 </body>
 </html>
