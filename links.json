@@ -22,5 +22,11 @@
     "note": "",
     "createdAt": "2026-04-14T16:18:00.523Z",
     "clicks": 0
+  },
+  "ai": {
+    "url": "https://horizon-llm.vercel.app",
+    "note": "Horizon.AI",
+    "createdAt": "2026-04-15T13:03:50.917Z",
+    "clicks": 0
   }
 }
