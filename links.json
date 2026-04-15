@@ -34,5 +34,11 @@
     "note": "Metrolist",
     "createdAt": "2026-04-15T14:22:41.610Z",
     "clicks": 0
+  },
+  "Signal-Beta": {
+    "url": "https://release-assets.githubusercontent.com/github-production-release-asset/2990192/462f74f6-e94b-4f6d-8809-8be2fa100a8f?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-04-15T15%3A25%3A12Z&rscd=attachment%3B+filename%3DSignal-Android-github-prod-universal-release-8.7.3.apk&rsct=application%2Fvnd.android.package-archive&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-04-15T14%3A25%3A06Z&ske=2026-04-15T15%3A25%3A12Z&sks=b&skv=2018-11-09&sig=rWcwW3GJWngRY6oV6oRxB0lev5dQuMonZb%2FRJBgp34A%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc3NjI2NjcwNiwibmJmIjoxNzc2MjYzMTA2LCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.qquYhSeU_pum7lLVeXr1pqXk5czcyBZqtuLUqBTyBY0&response-content-disposition=attachment%3B%20filename%3DSignal-Android-github-prod-universal-release-8.7.3.apk&response-content-type=application%2Fvnd.android.package-archive",
+    "note": "Signal",
+    "createdAt": "2026-04-15T14:26:40.315Z",
+    "clicks": 0
   }
 }
