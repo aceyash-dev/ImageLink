@@ -394,9 +394,28 @@
     </div>
 
     <script>
-        // ================= GLOBAL SETUP =================
+        // ================= GLOBAL SETUP & DB =================
         let isLightMode = localStorage.getItem('ace_workspace_theme') === 'light';
         if (isLightMode) document.body.classList.add('light-mode');
+
+        const DB_NAME = 'AceWorkspaceDB';
+        const STORE_NAME = 'imageHistory';
+        let db;
+
+        // IndexedDB Initialization
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onupgradeneeded = (e) => {
+                    db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                };
+                request.onsuccess = (e) => { db = e.target.result; resolve(); };
+                request.onerror = (e) => { console.error("IndexedDB Error", e); reject(); };
+            });
+        }
 
         function updateLordiconColors() {
             const icons = document.querySelectorAll('.themed-icon');
@@ -426,6 +445,7 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
             document.getElementById(`content-${tabName}`).classList.add('active');
+            sessionStorage.setItem('ace_active_tab', tabName); // Cache tab state
         }
 
         function showToast(message, type = "success") {
@@ -464,7 +484,19 @@
             setTimeout(() => modal.classList.add('show'), 10);
         }
 
-        window.onload = () => { updateLordiconColors(); initParticles(); renderLinkHistory(); renderImageHistory(); };
+        window.onload = async () => { 
+            updateLordiconColors(); initParticles(); 
+            
+            // Restore active tab to prevent reloading jumps
+            const savedTab = sessionStorage.getItem('ace_active_tab') || 'links';
+            switchTab(savedTab);
+
+            renderLinkHistory(); 
+            
+            // Wait for DB to init before rendering images to prevent data loss/wastage
+            await initDB();
+            renderImageHistory(); 
+        };
 
         // ================= URL SHORTENER LOGIC =================
         const LINK_STORAGE = "acelink_history";
@@ -541,7 +573,7 @@
                     markdownRaw: rawMarkdown, htmlSafe: safeHtml,
                     createdAt: new Date().toISOString(),
                     expiresAt: expiresAt,
-                    pinned: false // New Pin property
+                    pinned: false 
                 });
 
                 saveLinkHistory(); renderLinkHistory();
@@ -656,9 +688,9 @@
             updateLordiconColors(); 
         }
 
-        // ================= IMAGE HOST & EDITOR LOGIC =================
-        const IMG_STORAGE = 'imagelink_history_v8'; const CLOUD_NAME = 'dvzzebkww'; const UPLOAD_PRESET = 'linkshare_unsigned';
-        let imageUploadHistory = JSON.parse(localStorage.getItem(IMG_STORAGE)) || [];
+        // ================= IMAGE HOST & EDITOR LOGIC (WITH INDEXEDDB) =================
+        const CLOUD_NAME = 'dvzzebkww'; const UPLOAD_PRESET = 'linkshare_unsigned';
+        
         const dropzone = document.getElementById('dropzone'); const fileInput = document.getElementById('fileInput'); const imageQueueContainer = document.getElementById('imageQueueContainer');
 
         let currentEditingItem = null; let originalImageObj = new Image(); let currentImageObj = new Image(); 
@@ -674,7 +706,6 @@
         dropzone.addEventListener('drop', e => processImageFiles(e.dataTransfer.files), false);
         fileInput.addEventListener('change', e => processImageFiles(e.target.files), false);
 
-        // Client-Side Image Compression Function
         function compressImage(file, maxWidth = 1920, quality = 0.7) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
@@ -706,12 +737,12 @@
             fileInput.value = '';
         }
 
-        async function createImageQueueItem(name, b64Data, isNew = false, cloudUrl = null) {
-            const itemId = 'img-' + Math.random().toString(36).substr(2, 9);
+        async function createImageQueueItem(name, b64Data, isNew = false, cloudUrl = null, passedId = null) {
+            const itemId = passedId || 'img-' + Math.random().toString(36).substr(2, 9);
             const viewUrl = cloudUrl || b64Data; const safeName = name.replace(/"/g, '&quot;');
             const itemHTML = `
                 <div class="queue-item liquid-glass" id="${itemId}">
-                    <img src="${b64Data}" class="item-preview" id="thumb-${itemId}">
+                    <img src="${b64Data}" class="item-preview" id="thumb-${itemId}" loading="lazy">
                     <div class="item-header">
                         <input type="text" class="name-input" id="name-${itemId}" value="${safeName}" title="Click to rename" onchange="renameImageFile('${itemId}')">
                         <span class="item-status" style="color: ${isNew ? 'var(--solid-cyan)' : 'var(--success)'}; font-size: 0.75rem; font-weight:800;">${isNew ? 'UPLOADING...' : 'ONLINE'}</span>
@@ -742,8 +773,15 @@
             const newName = document.getElementById(`name-${itemId}`).value; const item = document.getElementById(itemId);
             item.dataset.filename = newName; const url = document.getElementById(`direct-${itemId}`).value;
             document.getElementById(`md-${itemId}`).value = `![${newName}](${url})`;
-            const histIndex = imageUploadHistory.findIndex(h => h.cloudUrl === item.dataset.cloud || h.b64Data === item.dataset.b64);
-            if(histIndex > -1) { imageUploadHistory[histIndex].name = newName; localStorage.setItem(IMG_STORAGE, JSON.stringify(imageUploadHistory)); }
+            
+            // Update IndexedDB
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(itemId);
+            request.onsuccess = (e) => {
+                const record = e.target.result;
+                if(record) { record.name = newName; store.put(record); }
+            };
             showToast("Renamed successfully.");
         };
 
@@ -780,7 +818,7 @@
                 console.error(err); status.textContent = 'LOCAL ONLY'; status.style.color = 'var(--danger)'; showToast("Cloud upload failed. Saved locally.", "error");
             }
             fill.style.width = '100%';
-            setTimeout(() => { track.style.display = 'none'; document.getElementById(`links-${itemId}`).classList.add('active'); if(finalUrl) saveToImageHistory(name, b64Data, finalUrl); }, 400);
+            setTimeout(() => { track.style.display = 'none'; document.getElementById(`links-${itemId}`).classList.add('active'); saveToImageHistory(itemId, name, b64Data, finalUrl); }, 400);
         }
 
         window.shareImageLink = (itemId) => {
@@ -796,9 +834,38 @@
             openModal('qrImageModal');
         };
 
-        function saveToImageHistory(name, b64Data, cloudUrl = null) { imageUploadHistory.unshift({ name, b64Data, cloudUrl, date: new Date().toISOString() }); if(imageUploadHistory.length > 12) imageUploadHistory.pop(); localStorage.setItem(IMG_STORAGE, JSON.stringify(imageUploadHistory)); }
-        function renderImageHistory() { imageQueueContainer.innerHTML = ''; imageUploadHistory.forEach(i => createImageQueueItem(i.name, i.b64Data, false, i.cloudUrl)); }
-        window.clearImageHistory = () => { if(confirm('Clear all uploaded images from history?')) { localStorage.removeItem(IMG_STORAGE); imageUploadHistory = []; imageQueueContainer.innerHTML = ''; } }
+        // IndexedDB Save Function
+        function saveToImageHistory(id, name, b64Data, cloudUrl = null) {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const record = { id, name, b64Data, cloudUrl, date: Date.now() };
+            store.put(record);
+        }
+
+        // IndexedDB Render Function
+        function renderImageHistory() {
+            imageQueueContainer.innerHTML = '';
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+            
+            request.onsuccess = (e) => {
+                let items = e.target.result;
+                // Sort by newest first
+                items.sort((a, b) => b.date - a.date);
+                items.forEach(i => createImageQueueItem(i.name, i.b64Data, false, i.cloudUrl, i.id));
+            };
+        }
+
+        window.clearImageHistory = () => { 
+            if(confirm('Clear all uploaded images from local cache?')) { 
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                store.clear();
+                imageQueueContainer.innerHTML = ''; 
+                showToast("Image cache cleared.", "trash");
+            } 
+        }
 
         // --- Image Editor Local Scope ---
         const inW = document.getElementById('editW'); const inH = document.getElementById('editH'); const unW = document.getElementById('unitW'); const unH = document.getElementById('unitH'); const lockRatio = document.getElementById('lockRatio'); let originalRatio = 1;
@@ -887,8 +954,21 @@
             } catch(e) { console.error(e); statusNode.textContent = 'LOCAL ONLY'; statusNode.style.color = 'var(--danger)'; showToast("Cloud update failed.", "error");}
 
             item.dataset.b64 = b64Data; document.getElementById(`direct-${currentEditingItem}`).value = finalUrl; document.getElementById(`md-${currentEditingItem}`).value = `![${name}](${finalUrl})`; document.getElementById(`thumb-${currentEditingItem}`).src = b64Data;
-            const histIndex = imageUploadHistory.findIndex(h => h.name === name);
-            if(histIndex > -1) { imageUploadHistory[histIndex].b64Data = b64Data; imageUploadHistory[histIndex].cloudUrl = item.dataset.cloud || null; localStorage.setItem(IMG_STORAGE, JSON.stringify(imageUploadHistory)); }
+            
+            // Save Edit back to IndexedDB
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(currentEditingItem);
+            request.onsuccess = (e) => {
+                const record = e.target.result;
+                if(record) {
+                    record.b64Data = b64Data;
+                    record.cloudUrl = item.dataset.cloud || null;
+                    record.date = Date.now(); // bump to top
+                    store.put(record);
+                }
+            };
+            
             showToast("Image updated successfully!"); closeModal('editorModal');
         }
     </script>
