@@ -39,7 +39,6 @@ export default async function handler(req, res) {
   // 2. Custom Alias & Collision Handling
   let code;
   if (alias) {
-    // Sanitize alias: allow only alphanumeric characters, dashes, and underscores
     code = alias.replace(/[^a-zA-Z0-9-_]/g, '');
     if (!code) return res.status(400).json({ message: "Invalid alias format." });
     if (links[code]) return res.status(409).json({ message: "Alias is already in use. Please choose another." });
@@ -65,7 +64,6 @@ export default async function handler(req, res) {
     sha,
   });
 
-  // Construct correct base URL
   const baseUrl =
     process.env.BASE_URL ||
     `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
