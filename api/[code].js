@@ -1,7 +1,6 @@
 import { Octokit } from "@octokit/rest";
 
 export default async function handler(req, res) {
-  // Extract the short code and any image transformation queries
   const { code, w, h, q, f, c } = req.query;
 
   const octokit = new Octokit({
@@ -33,17 +32,14 @@ export default async function handler(req, res) {
       // --- On-the-Fly Transformations for Images ---
       const transforms = [];
       
-      // Parse query parameters
-      if (w) transforms.push(`w_${w}`); // Width
-      if (h) transforms.push(`h_${h}`); // Height
-      if (q) transforms.push(`q_${q}`); // Quality (1-100)
-      if (f) transforms.push(`f_${f}`); // Format (e.g., png, jpg)
-      if (c) transforms.push(`c_${c}`); // Crop mode (e.g., fill, fit)
+      if (w) transforms.push(`w_${w}`);
+      if (h) transforms.push(`h_${h}`);
+      if (q) transforms.push(`q_${q}`);
+      if (f) transforms.push(`f_${f}`);
+      if (c) transforms.push(`c_${c}`);
       
-      // Auto-format for next-gen formats (WebP/AVIF) if no specific format is requested
       if (!f) transforms.push("f_auto");
 
-      // Inject transformations into the Cloudinary URL path
       if (transforms.length > 0) {
         const transformString = transforms.join(",");
         targetUrl = targetUrl.replace("/upload/", `/upload/${transformString}/`);
@@ -56,19 +52,17 @@ export default async function handler(req, res) {
         return res.status(imageResponse.status).send("Failed to fetch image from origin.");
       }
 
-      // Forward Correct Headers & Set Aggressive Edge Caching
+      // Forward Correct Headers & Set Aggressive Edge Caching for Zero Lag delivery
       const contentType = imageResponse.headers.get("content-type");
       res.setHeader("Content-Type", contentType || "image/jpeg");
       res.setHeader("Cache-Control", "public, s-maxage=31536000, stale-while-revalidate");
       res.setHeader("Access-Control-Allow-Origin", "*");
 
-      // Stream the binary data
       const arrayBuffer = await imageResponse.arrayBuffer();
       return res.status(200).send(Buffer.from(arrayBuffer));
 
     } else {
       // --- Standard Redirect for Regular Links ---
-      // Uses a shorter cache time since link destinations might be updated by you
       res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate");
       return res.redirect(302, targetUrl);
     }
